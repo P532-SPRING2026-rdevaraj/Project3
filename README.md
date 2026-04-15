@@ -9,10 +9,40 @@ Inspired by the Observations and Measurements patterns (Fowler, *Analysis Patter
 
 ---
 
-## Live URL
+## Live Links
 
-> **[https://your-app-name.onrender.com](https://your-app-name.onrender.com)**  
-> *(Update this URL after deploying to Render.com)*
+### Frontend (GitHub Pages)
+
+| Page | URL |
+|------|-----|
+| Patients (Home) | https://rohithgowdad.github.io/Project3/index.html |
+| Patient Detail | https://rohithgowdad.github.io/Project3/patient.html |
+| Catalogue | https://rohithgowdad.github.io/Project3/catalogue.html |
+| Logs | https://rohithgowdad.github.io/Project3/logs.html |
+
+### Backend (Render.com)
+
+> Base URL: `https://project3-ywcp.onrender.com`  
+> *(Replace with your actual Render URL)*
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | https://your-app-name.onrender.com/api/patients | List all patients |
+| POST | https://your-app-name.onrender.com/api/patients | Create patient |
+| GET | https://your-app-name.onrender.com/api/patients/{id}/observations | List observations for patient |
+| POST | https://your-app-name.onrender.com/api/observations/measurement | Record measurement |
+| POST | https://your-app-name.onrender.com/api/observations/category | Record category observation |
+| POST | https://your-app-name.onrender.com/api/observations/{id}/reject | Reject observation |
+| POST | https://your-app-name.onrender.com/api/patients/{id}/evaluate | Run diagnostic rules |
+| GET | https://your-app-name.onrender.com/api/phenomenon-types | List phenomenon types |
+| POST | https://your-app-name.onrender.com/api/phenomenon-types | Create phenomenon type |
+| POST | https://your-app-name.onrender.com/api/phenomenon-types/phenomena | Add phenomenon to type |
+| GET | https://your-app-name.onrender.com/api/protocols | List protocols |
+| POST | https://your-app-name.onrender.com/api/protocols | Create protocol |
+| GET | https://your-app-name.onrender.com/api/rules | List diagnostic rules |
+| POST | https://your-app-name.onrender.com/api/rules | Create diagnostic rule |
+| GET | https://your-app-name.onrender.com/api/command-log | View command log |
+| GET | https://your-app-name.onrender.com/api/audit-log | View audit log |
 
 ---
 
@@ -28,6 +58,29 @@ docker run -p 8080:8080 -v $(pwd)/data:/app/data tracker
 # 3. Open the UI
 open http://localhost:8080
 ```
+
+---
+
+## CI/CD Pipeline
+
+Every push triggers:
+
+```
+push to any branch
+    └── test job       → runs 28 unit tests
+
+push to main only
+    ├── build job      → builds JAR + Docker image
+    ├── deploy-frontend → deploys HTML/CSS/JS to GitHub Pages
+    └── deploy          → triggers Render.com redeploy (backend)
+```
+
+GitHub Secrets required:
+
+| Secret | Value |
+|--------|-------|
+| `RENDER_DEPLOY_HOOK` | Render deploy hook URL |
+| `RENDER_APP_URL` | Render app base URL (no trailing slash) |
 
 ---
 
@@ -82,38 +135,14 @@ Four-layer architecture enforced throughout:
 
 ---
 
-## API Reference
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/patients` | List all patients |
-| POST | `/api/patients` | Create patient |
-| GET | `/api/patients/{id}/observations` | List observations |
-| POST | `/api/observations/measurement` | Record measurement |
-| POST | `/api/observations/category` | Record category observation |
-| POST | `/api/observations/{id}/reject` | Reject observation |
-| POST | `/api/patients/{id}/evaluate` | Run diagnostic rules |
-| GET | `/api/phenomenon-types` | List phenomenon types |
-| POST | `/api/phenomenon-types` | Create phenomenon type |
-| POST | `/api/phenomenon-types/phenomena` | Add phenomenon to qualitative type |
-| GET | `/api/protocols` | List protocols |
-| POST | `/api/protocols` | Create protocol |
-| GET | `/api/rules` | List diagnostic rules |
-| POST | `/api/rules` | Create diagnostic rule |
-| GET | `/api/command-log` | View command log |
-| GET | `/api/audit-log` | View audit log |
-
----
-
 ## Render.com Deployment
 
 1. Create a **Web Service** on Render.com.
 2. Set environment to **Docker**.
 3. Set port to **8080**.
-4. Add a **Disk** (100 MB, mount path `/app/data`) so the SQLite file persists between deploys.
+4. Add a **Disk** (1 GB, mount path `/app/data`) so the SQLite file persists between deploys.
 5. Copy the deploy-hook URL and add it as a GitHub secret named `RENDER_DEPLOY_HOOK`.
-
-CI/CD pipeline: `test → build → deploy` (deploy runs on `main` only).
+6. Copy the app URL and add it as a GitHub secret named `RENDER_APP_URL`.
 
 ---
 
@@ -123,5 +152,4 @@ CI/CD pipeline: `test → build → deploy` (deploy runs on `main` only).
 mvn test
 ```
 
-Minimum 15 unit tests covering `ObservationFactory`, `SimpleConjunctiveStrategy`, Command objects, and Observer listeners. No `@SpringBootTest` in unit tests.
-
+28 unit tests covering `ObservationFactory`, `SimpleConjunctiveStrategy`, Command objects, and Observer listeners. No `@SpringBootTest` in unit tests.
