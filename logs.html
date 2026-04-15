@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs — Patient Observation Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<nav>
+    <span class="brand">Patient Observation Tracker</span>
+    <a href="index.html">Patients</a>
+    <a href="catalogue.html">Catalogue</a>
+    <a href="logs.html" class="active">Logs</a>
+</nav>
+
+<div class="container">
+    <h1 class="page-title">Logs</h1>
+    <div id="alert-area"></div>
+
+    <div class="grid-2">
+        <!-- Command Log -->
+        <div class="card">
+            <h2>Command Log</h2>
+            <p class="muted" style="margin-bottom:12px">Every state-changing action executed by staff (Command pattern).</p>
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Type</th><th>User</th><th>At</th><th>Payload</th></tr>
+                </thead>
+                <tbody id="cmd-tbody">
+                    <tr><td colspan="5" class="empty-state">Loading…</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Audit Log -->
+        <div class="card">
+            <h2>Audit Log</h2>
+            <p class="muted" style="margin-bottom:12px">Observation lifecycle events recorded by Observer listeners.</p>
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Event</th><th>Obs ID</th><th>Patient ID</th><th>At</th><th>Detail</th></tr>
+                </thead>
+                <tbody id="audit-tbody">
+                    <tr><td colspan="6" class="empty-state">Loading…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = 'https://project3-ywcp.onrender.com/api';
+
+function fmt(ts) {
+    return ts ? new Date(ts).toLocaleString() : '—';
+}
+
+function truncate(s, n = 60) {
+    if (!s) return '—';
+    return s.length > n ? s.substring(0, n) + '…' : s;
+}
+
+async function loadCommandLog() {
+    try {
+        const res = await fetch(`${API}/command-log`);
+        const entries = await res.json();
+        const tbody = document.getElementById('cmd-tbody');
+        if (!entries.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No commands yet.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = entries.map(e => `
+            <tr>
+                <td>${e.id}</td>
+                <td><code>${e.commandType}</code></td>
+                <td>${e.user}</td>
+                <td>${fmt(e.executedAt)}</td>
+                <td title="${e.payload}" class="muted">${truncate(e.payload)}</td>
+            </tr>`).join('');
+    } catch (err) {
+        document.getElementById('cmd-tbody').innerHTML =
+            '<tr><td colspan="5" class="empty-state">Failed to load.</td></tr>';
+    }
+}
+
+async function loadAuditLog() {
+    try {
+        const res = await fetch(`${API}/audit-log`);
+        const entries = await res.json();
+        const tbody = document.getElementById('audit-tbody');
+        if (!entries.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No audit events yet.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = entries.map(e => `
+            <tr>
+                <td>${e.id}</td>
+                <td><strong>${e.event}</strong></td>
+                <td>${e.observationId ?? '—'}</td>
+                <td>${e.patientId ?? '—'}</td>
+                <td>${fmt(e.timestamp)}</td>
+                <td class="muted">${e.detail || '—'}</td>
+            </tr>`).join('');
+    } catch (err) {
+        document.getElementById('audit-tbody').innerHTML =
+            '<tr><td colspan="6" class="empty-state">Failed to load.</td></tr>';
+    }
+}
+
+loadCommandLog();
+loadAuditLog();
+
+// Auto-refresh every 30 seconds
+setInterval(() => { loadCommandLog(); loadAuditLog(); }, 30000);
+</script>
+</body>
+</html>
