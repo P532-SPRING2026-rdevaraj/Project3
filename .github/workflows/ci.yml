@@ -47,7 +47,33 @@ jobs:
       - name: Build Docker image
         run: docker build -t tracker .
 
-  # ── Job 3: Deploy to Render.com (main branch only) ────────────
+  # ── Job 3: Deploy frontend to GitHub Pages (main only) ────────
+  deploy-frontend:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare static files with Render API URL
+        run: |
+          mkdir -p dist
+          cp -r src/main/resources/static/. dist/
+          RENDER_URL="${{ secrets.RENDER_APP_URL }}"
+          if [ -n "$RENDER_URL" ]; then
+            find dist -name "*.html" -exec sed -i "s|const API = '/api'|const API = '${RENDER_URL}/api'|g" {} +
+          fi
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+
+  # ── Job 4: Deploy backend to Render.com (main only) ───────────
   deploy:
     needs: build
     if: github.ref == 'refs/heads/main'
