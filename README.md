@@ -1,6 +1,6 @@
 # Patient Observation Tracker
 
-[![CI](https://github.com/YOUR_GITHUB_USERNAME/patient-observation-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_GITHUB_USERNAME/patient-observation-tracker/actions/workflows/ci.yml)
+[![CI](https://github.com/RohithGowdaD/Project3/actions/workflows/ci.yml/badge.svg)](https://github.com/RohithGowdaD/Project3/actions/workflows/ci.yml)
 
 **CSCI-P532 Object Oriented Software Development — Spring 2026 — Project 3, Week 1**
 

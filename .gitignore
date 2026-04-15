@@ -1,0 +1,16 @@
+# Maven build output
+target/
+
+# SQLite database (persisted at runtime, not versioned)
+data/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# macOS
+.DS_Store
+
+# Environment overrides
+*.env
