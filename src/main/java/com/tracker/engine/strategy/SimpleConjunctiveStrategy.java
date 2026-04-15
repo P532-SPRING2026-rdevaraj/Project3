@@ -4,6 +4,7 @@ import com.tracker.domain.AssociativeFunction;
 import com.tracker.domain.CategoryObservation;
 import com.tracker.domain.Measurement;
 import com.tracker.domain.Observation;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -17,9 +18,12 @@ import java.util.Set;
  * observation concepts (PhenomenonType IDs) are currently present as active
  * observations for the patient.
  *
- * Week 2 will add WeightedScoringStrategy as a second @Component without
- * modifying this class or DiagnosisStrategy.
+ * @Primary ensures this strategy is the default when multiple DiagnosisStrategy
+ * beans exist (e.g. when WeightedScoringStrategy is added in Week 2).
+ * Week 2 can inject WeightedScoringStrategy explicitly via @Qualifier without
+ * touching this class or DiagnosisEngine.
  */
+@Primary
 @Component
 public class SimpleConjunctiveStrategy implements DiagnosisStrategy {
 

@@ -41,6 +41,22 @@ public class CommandLog {
         repository.save(entry);
     }
 
+    /**
+     * Undoes the last executed command if it implements UndoableCommand.
+     * Week 2 calls this without modifying the rest of CommandLog.
+     *
+     * @param command the command to undo — must implement UndoableCommand
+     * @throws UnsupportedOperationException if the command is not undoable
+     */
+    public void undo(Command command) {
+        if (command instanceof UndoableCommand undoable) {
+            undoable.undo();
+        } else {
+            throw new UnsupportedOperationException(
+                command.getCommandType() + " does not support undo");
+        }
+    }
+
     /** Returns all log entries newest first (read-only endpoint). */
     public List<CommandLogEntry> getAll() {
         return repository.findAllByOrderByExecutedAtDesc();
