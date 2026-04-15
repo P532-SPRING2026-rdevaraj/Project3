@@ -15,9 +15,9 @@ public class CorsConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
                 .allowedOrigins(
-                    "https://rohithgowdad.github.io",  // GitHub Pages frontend
-                    "http://localhost:8080",            // local development
-                    "http://localhost:3000"             // local dev alternative
+                    "https://p532-spring2026-rdevaraj.github.io",  // GitHub Pages frontend
+                    "http://localhost:8080",                        // local development
+                    "http://localhost:3000"                         // local dev alternative
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")

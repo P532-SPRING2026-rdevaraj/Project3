@@ -15,34 +15,33 @@ Inspired by the Observations and Measurements patterns (Fowler, *Analysis Patter
 
 | Page | URL |
 |------|-----|
-| Patients (Home) | https://rohithgowdad.github.io/Project3/index.html |
-| Patient Detail | https://rohithgowdad.github.io/Project3/patient.html |
-| Catalogue | https://rohithgowdad.github.io/Project3/catalogue.html |
-| Logs | https://rohithgowdad.github.io/Project3/logs.html |
+| Patients (Home) | https://p532-spring2026-rdevaraj.github.io/Project3/index.html |
+| Patient Detail | https://p532-spring2026-rdevaraj.github.io/Project3/patient.html |
+| Catalogue | https://p532-spring2026-rdevaraj.github.io/Project3/catalogue.html |
+| Logs | https://p532-spring2026-rdevaraj.github.io/Project3/logs.html |
 
 ### Backend (Render.com)
 
-> Base URL: `https://project3-ywcp.onrender.com`  
-> *(Replace with your actual Render URL)*
+> Base URL: `https://project3-ywcp.onrender.com`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | https://your-app-name.onrender.com/api/patients | List all patients |
-| POST | https://your-app-name.onrender.com/api/patients | Create patient |
-| GET | https://your-app-name.onrender.com/api/patients/{id}/observations | List observations for patient |
-| POST | https://your-app-name.onrender.com/api/observations/measurement | Record measurement |
-| POST | https://your-app-name.onrender.com/api/observations/category | Record category observation |
-| POST | https://your-app-name.onrender.com/api/observations/{id}/reject | Reject observation |
-| POST | https://your-app-name.onrender.com/api/patients/{id}/evaluate | Run diagnostic rules |
-| GET | https://your-app-name.onrender.com/api/phenomenon-types | List phenomenon types |
-| POST | https://your-app-name.onrender.com/api/phenomenon-types | Create phenomenon type |
-| POST | https://your-app-name.onrender.com/api/phenomenon-types/phenomena | Add phenomenon to type |
-| GET | https://your-app-name.onrender.com/api/protocols | List protocols |
-| POST | https://your-app-name.onrender.com/api/protocols | Create protocol |
-| GET | https://your-app-name.onrender.com/api/rules | List diagnostic rules |
-| POST | https://your-app-name.onrender.com/api/rules | Create diagnostic rule |
-| GET | https://your-app-name.onrender.com/api/command-log | View command log |
-| GET | https://your-app-name.onrender.com/api/audit-log | View audit log |
+| GET | https://project3-ywcp.onrender.com/api/patients | List all patients |
+| POST | https://project3-ywcp.onrender.com/api/patients | Create patient |
+| GET | https://project3-ywcp.onrender.com/api/patients/{id}/observations | List observations for patient |
+| POST | https://project3-ywcp.onrender.com/api/observations/measurement | Record measurement |
+| POST | https://project3-ywcp.onrender.com/api/observations/category | Record category observation |
+| POST | https://project3-ywcp.onrender.com/api/observations/{id}/reject | Reject observation |
+| POST | https://project3-ywcp.onrender.com/api/patients/{id}/evaluate | Run diagnostic rules |
+| GET | https://project3-ywcp.onrender.com/api/phenomenon-types | List phenomenon types |
+| POST | https://project3-ywcp.onrender.com/api/phenomenon-types | Create phenomenon type |
+| POST | https://project3-ywcp.onrender.com/api/phenomenon-types/phenomena | Add phenomenon to type |
+| GET | https://project3-ywcp.onrender.com/api/protocols | List protocols |
+| POST | https://project3-ywcp.onrender.com/api/protocols | Create protocol |
+| GET | https://project3-ywcp.onrender.com/api/rules | List diagnostic rules |
+| POST | https://project3-ywcp.onrender.com/api/rules | Create diagnostic rule |
+| GET | https://project3-ywcp.onrender.com/api/command-log | View command log |
+| GET | https://project3-ywcp.onrender.com/api/audit-log | View audit log |
 
 ---
 
