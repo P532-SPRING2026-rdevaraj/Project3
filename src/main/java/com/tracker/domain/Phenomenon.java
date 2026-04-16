@@ -1,5 +1,6 @@
 package com.tracker.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 /**
@@ -21,6 +22,7 @@ public class Phenomenon {
     @Column(nullable = false)
     private String name;
 
+    @JsonIgnore
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "phenomenon_type_id", nullable = false)
     private PhenomenonType phenomenonType;
