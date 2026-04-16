@@ -1,0 +1,213 @@
+% ────────────────────────────────────────────────────────────────────────────
+%  Patient Observation Tracker — Design Document
+%  CSCI-P532 Object Oriented Software Development · Spring 2026 · Week 1
+% ────────────────────────────────────────────────────────────────────────────
+\documentclass[9pt]{article}
+
+\usepackage[a4paper,
+            top=0.45in, bottom=0.45in,
+            left=0.45in, right=0.45in]{geometry}
+
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{multicol}
+\usepackage{enumitem}
+\usepackage{helvet}
+\usepackage{microtype}
+
+\renewcommand{\familydefault}{\sfdefault}
+\pagestyle{empty}
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{14pt}
+
+% (no background colours used)
+
+% ── Compact list style ────────────────────────────────────────────────────────
+\setlist[enumerate]{itemsep=1pt, topsep=1pt, parsep=0pt, partopsep=0pt}
+\setlist[enumerate,2]{label=\alph*., leftmargin=1.4em}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{document}
+
+% ── Title ─────────────────────────────────────────────────────────────────────
+{\centering
+  {\large\bfseries Patient Observation Tracker — Design Document}\\[1pt]
+  {\small CSCI-P532 Object Oriented Software Development \textbar{}
+          Spring 2026 \textbar{} Week 1}\par
+}
+\vspace{3pt}\hrule\vspace{5pt}
+
+% ═════════════════════════════════════════════════════════════════════════════
+% 1.  LAYERED COMPONENT DIAGRAM
+% ═════════════════════════════════════════════════════════════════════════════
+{\small\bfseries 1.\enspace Layered Component Diagram}
+\vspace{3pt}
+
+\noindent
+{\scriptsize
+\begin{tabularx}{\linewidth}{@{}
+    >{\bfseries\raggedright\arraybackslash}p{2.6cm}
+    >{\raggedright\arraybackslash}X
+  @{}}
+\toprule
+\textbf{Layer} & \textbf{Components} \\
+\midrule
+Client \newline\mdseries(\texttt{@RestController}) &
+  PatientController \textbullet{} ObservationController \textbullet{}
+  PhenomenonTypeController \textbullet{} ProtocolController \textbullet{}
+  DiagnosticRuleController \textbullet{} LogController \textbullet{}
+  GlobalExceptionHandler \\[2pt]
+Manager \newline\mdseries(\texttt{@Service}) &
+  PatientManager \textbullet{} ObservationManager \textbullet{}
+  PhenomenonTypeManager \textbullet{} ProtocolManager \textbullet{}
+  DiagnosticRuleManager \textbullet{} LogManager \\[2pt]
+Engine \newline\mdseries(\texttt{@Service}/\texttt{@Component}) &
+  ObservationFactory \textbullet{} DiagnosisEngine \textbullet{} CommandLog \textbullet{}
+  SimpleConjunctiveStrategy \textbullet{} DiagnosisStrategy\,\textit{(iface)} \textbullet{}
+  ObservationProcessorDecorator \textbullet{} PassThroughProcessor \textbullet{}
+  CreatePatientCommand \textbullet{} RecordObservationCommand \textbullet{}
+  RejectObservationCommand \textbullet{} Command\,\textit{(iface)} \textbullet{} UndoableCommand\,\textit{(iface)} \\[2pt]
+ResourceAccess \newline\mdseries(\texttt{@Repository}) &
+  PatientRepository \textbullet{} ObservationRepository \textbullet{}
+  PhenomenonTypeRepository \textbullet{} PhenomenonRepository \textbullet{}
+  ProtocolRepository \textbullet{} AssociativeFunctionRepository \textbullet{}
+  CommandLogEntryRepository \textbullet{} AuditLogEntryRepository \\[2pt]
+Resource &
+  SQLite database \texttt{tracker.db} — accessed via Spring Data JPA / Hibernate (JOINED-table inheritance) \\[2pt]
+Utility &
+  AuditLogListener \textbullet{} RuleEvaluationListener \textbullet{} ObservationEvent \textbullet{}
+  ClockConfig \textbullet{}
+  DTOs: MeasurementRequest, CategoryObservationRequest, ObservationResponse, \ldots\textbullet{}
+  Enums: MeasurementKind, ObservationStatus, Presence, AccuracyRating \\[2pt]
+\bottomrule
+\end{tabularx}
+}
+
+\vspace{6pt}
+
+% ═════════════════════════════════════════════════════════════════════════════
+% 2.  CALL CHAINS
+% ═════════════════════════════════════════════════════════════════════════════
+{\small\bfseries 2.\enspace Core Use-Case Call Chains}
+\vspace{3pt}
+
+\setlength{\multicolsep}{0pt}
+\begin{multicols}{2}
+\noindent\textit{\small UC-1: Record a Measurement (F3)}
+\vspace{2pt}
+
+\begin{enumerate}[leftmargin=1.4em, label=\textbf{\arabic*.}, font=\scriptsize\bfseries,
+                  itemsep=2pt, topsep=0pt]
+  \scriptsize
+  \item \textbf{HTTP} \texttt{POST /api/observations/measurement}
+  \item \textbf{ObservationController} $\rightarrow$ ObservationManager.recordMeasurement()
+  \item \textbf{ObservationManager} $\rightarrow$ PatientManager.findById()
+  \item \textbf{ObservationManager} $\rightarrow$ PhenomenonTypeManager.findById()
+  \item \textbf{ObservationManager} $\rightarrow$ \textbf{ObservationFactory}\newline
+        .createMeasurement() \quad\textit{[validates kind \& unit]}
+  \item \textbf{ObservationManager} $\rightarrow$ ObservationProcessor.process()
+  \item \textbf{ObservationManager} $\rightarrow$ \textbf{CommandLog}.execute(\textit{RecordObservationCmd})
+        \begin{enumerate}
+          \scriptsize
+          \item $\rightarrow$ ObservationRepository.save()
+          \item $\rightarrow$ CommandLogEntryRepository.save()
+        \end{enumerate}
+  \item \textbf{ObservationManager} $\rightarrow$ ApplicationEventPublisher\newline
+        .publishEvent(ObservationEvent.CREATED)
+        \begin{enumerate}
+          \scriptsize
+          \item \textbf{AuditLogListener} $\rightarrow$ AuditLogEntryRepository.save()
+          \item \textbf{RuleEvaluationListener} $\rightarrow$ DiagnosisEngine.evaluate()
+        \end{enumerate}
+  \item Return \textbf{ObservationResponse} (HTTP 201)
+\end{enumerate}
+
+\columnbreak
+\noindent\textit{\small UC-2: Evaluate Diagnostic Rules (F6)}
+\vspace{2pt}
+
+\begin{enumerate}[leftmargin=1.4em, label=\textbf{\arabic*.}, font=\scriptsize\bfseries,
+                  itemsep=2pt, topsep=0pt]
+  \scriptsize
+  \item \textbf{HTTP} \texttt{POST /api/patients/\{id\}/evaluate}
+  \item \textbf{ObservationController} $\rightarrow$ DiagnosticRuleManager\newline
+        .evaluateForPatient(patientId)
+  \item \textbf{DiagnosticRuleManager} $\rightarrow$ ObservationRepository\newline
+        .findByPatientIdAndStatus(ACTIVE)
+  \item \textbf{DiagnosticRuleManager} $\rightarrow$ AssociativeFunctionRepository\newline
+        .findByActiveTrue()
+  \item \textbf{DiagnosticRuleManager} $\rightarrow$ \textbf{DiagnosisEngine}\newline
+        .evaluate(rules, activeObservations)
+  \item \textbf{DiagnosisEngine} iterates each rule; invokes \textbf{DiagnosisStrategy}\newline
+        .evaluate(rule, observations)
+  \item \textbf{SimpleConjunctiveStrategy} collects observed PhenomenonType IDs;\newline
+        fires rule iff all argument IDs are covered
+  \item Fired rules' \textit{productConcept} names collected into result list
+  \item Return \texttt{List<String>} inferred concept names (HTTP 200) — \textbf{not persisted}
+\end{enumerate}
+
+\end{multicols}
+
+\vspace{4pt}
+
+% ═════════════════════════════════════════════════════════════════════════════
+% 3.  DESIGN PATTERNS
+% ═════════════════════════════════════════════════════════════════════════════
+{\small\bfseries 3.\enspace Design Patterns}
+\vspace{3pt}
+
+\noindent
+{\scriptsize
+\begin{tabularx}{\linewidth}{@{}
+    >{\bfseries\raggedright\arraybackslash}p{1.9cm}
+    >{\raggedright\arraybackslash}p{5.6cm}
+    >{\raggedright\arraybackslash}X
+  @{}}
+\toprule
+\textbf{Pattern} & \textbf{Classes Involved} & \textbf{One-Sentence Justification} \\
+\midrule
+Strategy &
+  \texttt{DiagnosisStrategy} (interface) \textbullet{}
+  \texttt{DiagnosisEngine} \textbullet{}
+  \texttt{SimpleConjunctiveStrategy} &
+  Injecting the evaluation algorithm as an interface means a second strategy
+  (e.g.\ \texttt{WeightedScoringStrategy}) can be added in Week 2 with a new
+  \texttt{@Component}, touching neither \texttt{DiagnosisEngine} nor any existing class. \\[3pt]
+Observer &
+  \texttt{ObservationManager} (publisher) \textbullet{}
+  \texttt{ObservationEvent} \textbullet{}
+  \texttt{AuditLogListener} \textbullet{}
+  \texttt{RuleEvaluationListener} &
+  Publishing a Spring \texttt{ApplicationEvent} on every observation lifecycle change
+  keeps all listeners completely decoupled from the manager, so
+  \texttt{PropagationListener} can be added in Week 2 with zero changes to existing code. \\[3pt]
+Factory &
+  \texttt{ObservationFactory} \textbullet{}
+  \texttt{Measurement} \textbullet{}
+  \texttt{CategoryObservation} &
+  Routing all \texttt{Observation} subtype construction through
+  \texttt{ObservationFactory} centralises kind-compatibility and unit-allowlist
+  validation in one authorised place, so managers can trust factory output is valid. \\[3pt]
+Command &
+  \texttt{Command} (interface) \textbullet{}
+  \texttt{CreatePatientCommand} \textbullet{}
+  \texttt{RecordObservationCommand} \textbullet{}
+  \texttt{RejectObservationCommand} \textbullet{}
+  \texttt{CommandLog} &
+  Wrapping every state-changing action in a \texttt{Command} with a JSON payload
+  lets \texttt{CommandLog} persist a complete, schema-stable audit trail and
+  enables Week 2 undo without any database schema change. \\[3pt]
+Decorator &
+  \texttt{ObservationProcessor} (interface) \textbullet{}
+  \texttt{ObservationProcessorDecorator} \textbullet{}
+  \texttt{PassThroughProcessor} &
+  Expressing the post-processing pipeline as a chain of decorators means new stages
+  (unit normalisation, propagation) can be inserted in Week 2 by wrapping the existing
+  Spring bean, leaving \texttt{ObservationManager} and all existing processors unchanged. \\
+\bottomrule
+\end{tabularx}
+}
+
+\end{document}
