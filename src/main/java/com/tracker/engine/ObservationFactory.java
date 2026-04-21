@@ -3,6 +3,7 @@ package com.tracker.engine;
 import com.tracker.domain.*;
 import org.springframework.stereotype.Service;
 
+
 import java.time.Clock;
 import java.time.Instant;
 
@@ -33,6 +34,12 @@ public class ObservationFactory {
      * @throws IllegalArgumentException if the phenomenon type is not QUANTITATIVE
      *                                   or the unit is not in the allowed set
      */
+    /**
+     * Creates a Measurement. Kind validation remains here; unit validation was moved
+     * to UnitValidationDecorator in the processing pipeline (Change 2).
+     *
+     * @throws IllegalArgumentException if the phenomenon type is not QUANTITATIVE
+     */
     public Measurement createMeasurement(Patient patient,
                                          PhenomenonType phenomenonType,
                                          Double amount,
@@ -43,16 +50,13 @@ public class ObservationFactory {
             throw new IllegalArgumentException(
                 "PhenomenonType '" + phenomenonType.getName() + "' is not QUANTITATIVE");
         }
-        if (!phenomenonType.getAllowedUnits().contains(unit)) {
-            throw new IllegalArgumentException(
-                "Unit '" + unit + "' is not allowed for '" + phenomenonType.getName()
-                + "'. Allowed: " + phenomenonType.getAllowedUnits());
-        }
 
         Instant now = Instant.now(clock);
         Instant appTime = (applicabilityTime != null) ? applicabilityTime : now;
 
-        return new Measurement(patient, now, appTime, protocol, phenomenonType, amount, unit);
+        Measurement m = new Measurement(patient, now, appTime, protocol, phenomenonType, amount, unit);
+        m.setSource(ObservationSource.MANUAL);
+        return m;
     }
 
     /**
@@ -65,6 +69,20 @@ public class ObservationFactory {
                                                           Presence presence,
                                                           Protocol protocol,
                                                           Instant applicabilityTime) {
+        return createCategoryObservation(patient, phenomenon, presence, protocol,
+                                         applicabilityTime, ObservationSource.MANUAL);
+    }
+
+    /**
+     * Creates a CategoryObservation with an explicit source — used by PropagationListener
+     * to create INFERRED observations (Change 4).
+     */
+    public CategoryObservation createCategoryObservation(Patient patient,
+                                                          Phenomenon phenomenon,
+                                                          Presence presence,
+                                                          Protocol protocol,
+                                                          Instant applicabilityTime,
+                                                          ObservationSource source) {
         if (phenomenon.getPhenomenonType().getKind() != MeasurementKind.QUALITATIVE) {
             throw new IllegalArgumentException(
                 "Phenomenon '" + phenomenon.getName() + "' belongs to a non-QUALITATIVE type");
@@ -73,6 +91,8 @@ public class ObservationFactory {
         Instant now = Instant.now(clock);
         Instant appTime = (applicabilityTime != null) ? applicabilityTime : now;
 
-        return new CategoryObservation(patient, now, appTime, protocol, phenomenon, presence);
+        CategoryObservation obs = new CategoryObservation(patient, now, appTime, protocol, phenomenon, presence);
+        obs.setSource(source);
+        return obs;
     }
 }

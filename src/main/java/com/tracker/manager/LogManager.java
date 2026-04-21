@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Manager layer — provides read access to command and audit logs.
+ * Manager layer — read access to command and audit logs.
+ * Week 2 undo logic lives in UndoManager (Change 3).
  */
 @Service
 public class LogManager {
@@ -17,7 +18,8 @@ public class LogManager {
     private final CommandLog commandLog;
     private final AuditLogEntryRepository auditLogEntryRepository;
 
-    public LogManager(CommandLog commandLog, AuditLogEntryRepository auditLogEntryRepository) {
+    public LogManager(CommandLog commandLog,
+                      AuditLogEntryRepository auditLogEntryRepository) {
         this.commandLog = commandLog;
         this.auditLogEntryRepository = auditLogEntryRepository;
     }

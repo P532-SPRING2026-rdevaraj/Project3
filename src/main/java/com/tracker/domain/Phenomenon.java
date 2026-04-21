@@ -27,6 +27,14 @@ public class Phenomenon {
     @JoinColumn(name = "phenomenon_type_id", nullable = false)
     private PhenomenonType phenomenonType;
 
+    /**
+     * Optional parent concept enabling hierarchy (Change 4 — concept hierarchy propagation).
+     * Null means this is a root concept.
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "parent_concept_id")
+    private Phenomenon parentConcept;
+
     public Phenomenon() {}
 
     public Phenomenon(String name, PhenomenonType phenomenonType) {
@@ -42,4 +50,7 @@ public class Phenomenon {
 
     public PhenomenonType getPhenomenonType() { return phenomenonType; }
     public void setPhenomenonType(PhenomenonType phenomenonType) { this.phenomenonType = phenomenonType; }
+
+    public Phenomenon getParentConcept() { return parentConcept; }
+    public void setParentConcept(Phenomenon parentConcept) { this.parentConcept = parentConcept; }
 }

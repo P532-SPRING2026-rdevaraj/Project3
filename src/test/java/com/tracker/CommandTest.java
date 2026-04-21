@@ -44,7 +44,6 @@ class CommandTest {
 
     @Test
     void createPatientCommand_execute_savesPatientViaRepository() {
-        // Arrange
         Patient saved = new Patient("Alice", LocalDate.of(1990, 1, 1), "Note");
         saved.setId(1L);
         when(patientRepository.save(any(Patient.class))).thenReturn(saved);
@@ -52,10 +51,8 @@ class CommandTest {
         CreatePatientCommand cmd = new CreatePatientCommand(
             patientRepository, "Alice", LocalDate.of(1990, 1, 1), "Note");
 
-        // Act
         cmd.execute();
 
-        // Assert
         verify(patientRepository, times(1)).save(any(Patient.class));
         assertNotNull(cmd.getCreatedPatient());
         assertEquals("Alice", cmd.getCreatedPatient().getFullName());
@@ -63,33 +60,24 @@ class CommandTest {
 
     @Test
     void createPatientCommand_getCommandType_returnsCREATE_PATIENT() {
-        // Arrange
         CreatePatientCommand cmd = new CreatePatientCommand(
             patientRepository, "Bob", LocalDate.of(1985, 6, 15), null);
-
-        // Act & Assert
         assertEquals("CREATE_PATIENT", cmd.getCommandType());
     }
 
     @Test
     void createPatientCommand_getPayload_containsFullName() {
-        // Arrange
         CreatePatientCommand cmd = new CreatePatientCommand(
             patientRepository, "Charlie", LocalDate.of(2000, 3, 10), "Some note");
-
-        // Act
         String payload = cmd.getPayload();
-
-        // Assert
-        assertTrue(payload.contains("Charlie"), "Payload must include the patient name");
-        assertTrue(payload.contains("2000-03-10"), "Payload must include date of birth");
+        assertTrue(payload.contains("Charlie"));
+        assertTrue(payload.contains("2000-03-10"));
     }
 
     // ── RecordObservationCommand ──────────────────────────────────
 
     @Test
     void recordObservationCommand_execute_savesObservation() {
-        // Arrange
         Patient p = new Patient("Test", LocalDate.now(), null);
         p.setId(1L);
         PhenomenonType pt = new PhenomenonType("Temp", MeasurementKind.QUANTITATIVE);
@@ -100,17 +88,14 @@ class CommandTest {
         RecordObservationCommand cmd = new RecordObservationCommand(
             observationRepository, m, "{\"patientId\":1}");
 
-        // Act
         cmd.execute();
 
-        // Assert
         verify(observationRepository, times(1)).save(m);
         assertNotNull(cmd.getSavedObservation());
     }
 
     @Test
     void recordObservationCommand_getCommandType_returnsRECORD_OBSERVATION() {
-        // Arrange
         Patient p = new Patient("Test", LocalDate.now(), null);
         PhenomenonType pt = new PhenomenonType("Temp", MeasurementKind.QUANTITATIVE);
         Measurement m = new Measurement(p, FIXED_NOW, FIXED_NOW, null, pt, 37.0, "°C");
@@ -118,7 +103,6 @@ class CommandTest {
         RecordObservationCommand cmd = new RecordObservationCommand(
             observationRepository, m, "{}");
 
-        // Act & Assert
         assertEquals("RECORD_OBSERVATION", cmd.getCommandType());
     }
 
@@ -126,7 +110,6 @@ class CommandTest {
 
     @Test
     void rejectObservationCommand_execute_setsStatusRejected() {
-        // Arrange
         Patient p = new Patient("Test", LocalDate.now(), null);
         p.setId(1L);
         PhenomenonType pt = new PhenomenonType("Temp", MeasurementKind.QUANTITATIVE);
@@ -137,10 +120,8 @@ class CommandTest {
         RejectObservationCommand cmd = new RejectObservationCommand(
             observationRepository, obs, "Entry error");
 
-        // Act
         cmd.execute();
 
-        // Assert
         assertEquals(ObservationStatus.REJECTED, obs.getStatus());
         assertEquals("Entry error", obs.getRejectionReason());
         verify(observationRepository).save(obs);
@@ -148,7 +129,6 @@ class CommandTest {
 
     @Test
     void rejectObservationCommand_getPayload_containsObservationId() {
-        // Arrange
         Patient p = new Patient("Test", LocalDate.now(), null);
         PhenomenonType pt = new PhenomenonType("Temp", MeasurementKind.QUANTITATIVE);
         Measurement obs = new Measurement(p, FIXED_NOW, FIXED_NOW, null, pt, 37.0, "°C");
@@ -157,23 +137,18 @@ class CommandTest {
         RejectObservationCommand cmd = new RejectObservationCommand(
             observationRepository, obs, "Wrong unit");
 
-        // Act
         String payload = cmd.getPayload();
-
-        // Assert
-        assertTrue(payload.contains("42"), "Payload must include the observation ID");
-        assertTrue(payload.contains("Wrong unit"), "Payload must include the rejection reason");
+        assertTrue(payload.contains("42"));
+        assertTrue(payload.contains("Wrong unit"));
     }
 
     // ── CommandLog ────────────────────────────────────────────────
 
     @Test
     void commandLog_execute_persistsEntryToRepository() {
-        // Arrange
         CommandLog commandLog = new CommandLog(commandLogEntryRepository, fixedClock);
         when(commandLogEntryRepository.save(any(CommandLogEntry.class)))
             .thenAnswer(inv -> inv.getArgument(0));
-
         Patient saved = new Patient("Dave", LocalDate.now(), null);
         saved.setId(99L);
         when(patientRepository.save(any())).thenReturn(saved);
@@ -181,24 +156,19 @@ class CommandTest {
         CreatePatientCommand cmd = new CreatePatientCommand(
             patientRepository, "Dave", LocalDate.now(), null);
 
-        // Act
         commandLog.execute(cmd);
 
-        // Assert
         verify(commandLogEntryRepository, times(1)).save(any(CommandLogEntry.class));
     }
 
     @Test
     void commandLog_execute_logsUserAsStaff() {
-        // Arrange
         CommandLog commandLog = new CommandLog(commandLogEntryRepository, fixedClock);
-        when(patientRepository.save(any())).thenReturn(
-            new Patient("Eve", LocalDate.now(), null));
+        when(patientRepository.save(any())).thenReturn(new Patient("Eve", LocalDate.now(), null));
 
         CreatePatientCommand cmd = new CreatePatientCommand(
             patientRepository, "Eve", LocalDate.now(), null);
 
-        // Capture the saved entry
         when(commandLogEntryRepository.save(any(CommandLogEntry.class)))
             .thenAnswer(inv -> {
                 CommandLogEntry entry = inv.getArgument(0);
@@ -206,10 +176,8 @@ class CommandTest {
                 return entry;
             });
 
-        // Act
         commandLog.execute(cmd);
 
-        // Assert — verification happens inside the thenAnswer above
         verify(commandLogEntryRepository).save(any(CommandLogEntry.class));
     }
 }

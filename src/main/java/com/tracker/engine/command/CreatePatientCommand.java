@@ -6,8 +6,7 @@ import com.tracker.resourceaccess.PatientRepository;
 import java.time.LocalDate;
 
 /**
- * Command pattern — wraps the "create patient" operation.
- * F1: Patient management.
+ * Command pattern — wraps the "create patient" operation (F1).
  */
 public class CreatePatientCommand implements Command {
 
@@ -33,9 +32,7 @@ public class CreatePatientCommand implements Command {
     }
 
     @Override
-    public String getCommandType() {
-        return "CREATE_PATIENT";
-    }
+    public String getCommandType() { return "CREATE_PATIENT"; }
 
     @Override
     public String getPayload() {
@@ -44,9 +41,7 @@ public class CreatePatientCommand implements Command {
             + "\",\"note\":\"" + escapeJson(note == null ? "" : note) + "\"}";
     }
 
-    public Patient getCreatedPatient() {
-        return createdPatient;
-    }
+    public Patient getCreatedPatient() { return createdPatient; }
 
     private String escapeJson(String s) {
         return s == null ? "" : s.replace("\\", "\\\\").replace("\"", "\\\"");

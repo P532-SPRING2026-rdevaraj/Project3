@@ -43,6 +43,9 @@ public class PhenomenonTypeManager {
         if (request.getKind() == MeasurementKind.QUANTITATIVE && request.getAllowedUnits() != null) {
             pt.setAllowedUnits(request.getAllowedUnits());
         }
+        // Change 2: store normal range for anomaly detection
+        pt.setNormalMin(request.getNormalMin());
+        pt.setNormalMax(request.getNormalMax());
         return phenomenonTypeRepository.save(pt);
     }
 
@@ -53,6 +56,11 @@ public class PhenomenonTypeManager {
                 "Can only add phenomena to QUALITATIVE phenomenon types");
         }
         Phenomenon ph = new Phenomenon(request.getName(), pt);
+        // Change 4: wire parent concept if provided
+        if (request.getParentConceptId() != null) {
+            Phenomenon parent = findPhenomenonById(request.getParentConceptId());
+            ph.setParentConcept(parent);
+        }
         return phenomenonRepository.save(ph);
     }
 

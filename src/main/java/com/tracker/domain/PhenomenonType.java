@@ -37,6 +37,14 @@ public class PhenomenonType {
     @Column(columnDefinition = "TEXT")
     private String allowedUnitsRaw;
 
+    /** Normal range lower bound for QUANTITATIVE types — used by AnomalyFlaggingDecorator (Change 2). */
+    @Column
+    private Double normalMin;
+
+    /** Normal range upper bound for QUANTITATIVE types — used by AnomalyFlaggingDecorator (Change 2). */
+    @Column
+    private Double normalMax;
+
     /**
      * Phenomena (qualitative values) belong to this type via the Phenomenon entity.
      * Only populated for QUALITATIVE types.
@@ -89,6 +97,12 @@ public class PhenomenonType {
             this.allowedUnitsRaw = String.join(",", units);
         }
     }
+
+    public Double getNormalMin() { return normalMin; }
+    public void setNormalMin(Double normalMin) { this.normalMin = normalMin; }
+
+    public Double getNormalMax() { return normalMax; }
+    public void setNormalMax(Double normalMax) { this.normalMax = normalMax; }
 
     public List<Phenomenon> getPhenomena() { return phenomena; }
     public void setPhenomena(List<Phenomenon> phenomena) { this.phenomena = phenomena; }

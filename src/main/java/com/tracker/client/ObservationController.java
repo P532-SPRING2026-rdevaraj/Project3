@@ -1,7 +1,6 @@
 package com.tracker.client;
 
 import com.tracker.domain.Observation;
-import com.tracker.domain.PhenomenonType;
 import com.tracker.dto.*;
 import com.tracker.manager.DiagnosticRuleManager;
 import com.tracker.manager.ObservationManager;
@@ -12,7 +11,7 @@ import java.util.List;
 
 /**
  * Client layer — HTTP only, zero business logic.
- * Covers F3, F4, F6, F7, F8.
+ * Change 1: evaluate endpoint returns List<EvaluationResult> (strategy + evidence).
  */
 @RestController
 public class ObservationController {
@@ -26,7 +25,6 @@ public class ObservationController {
         this.diagnosticRuleManager = diagnosticRuleManager;
     }
 
-    /** GET /api/patients/{id}/observations — List observations (F7). */
     @GetMapping("/api/patients/{id}/observations")
     public List<ObservationResponse> listForPatient(@PathVariable Long id) {
         return observationManager.listForPatient(id).stream()
@@ -34,7 +32,6 @@ public class ObservationController {
             .toList();
     }
 
-    /** POST /api/observations/measurement — Record measurement (F3). */
     @PostMapping("/api/observations/measurement")
     @ResponseStatus(HttpStatus.CREATED)
     public ObservationResponse recordMeasurement(@RequestBody MeasurementRequest request) {
@@ -42,7 +39,6 @@ public class ObservationController {
         return ObservationResponse.from(obs);
     }
 
-    /** POST /api/observations/category — Record category observation (F4). */
     @PostMapping("/api/observations/category")
     @ResponseStatus(HttpStatus.CREATED)
     public ObservationResponse recordCategory(@RequestBody CategoryObservationRequest request) {
@@ -50,7 +46,6 @@ public class ObservationController {
         return ObservationResponse.from(obs);
     }
 
-    /** POST /api/observations/{id}/reject — Reject observation (F8). */
     @PostMapping("/api/observations/{id}/reject")
     public ObservationResponse reject(@PathVariable Long id,
                                       @RequestBody RejectObservationRequest request) {
@@ -58,10 +53,9 @@ public class ObservationController {
         return ObservationResponse.from(obs);
     }
 
-    /** POST /api/patients/{id}/evaluate — Run diagnostic rules (F6). */
+    /** POST /api/patients/{id}/evaluate — returns inferred concepts with strategy and evidence (Change 1). */
     @PostMapping("/api/patients/{id}/evaluate")
-    public List<String> evaluate(@PathVariable Long id) {
-        List<PhenomenonType> inferred = diagnosticRuleManager.evaluateForPatient(id);
-        return inferred.stream().map(PhenomenonType::getName).toList();
+    public List<EvaluationResult> evaluate(@PathVariable Long id) {
+        return diagnosticRuleManager.evaluateForPatient(id);
     }
 }

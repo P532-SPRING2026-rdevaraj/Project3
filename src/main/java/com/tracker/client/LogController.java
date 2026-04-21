@@ -3,14 +3,14 @@ package com.tracker.client;
 import com.tracker.domain.AuditLogEntry;
 import com.tracker.domain.CommandLogEntry;
 import com.tracker.manager.LogManager;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
  * Client layer — HTTP only, zero business logic.
- * Exposes read-only command log and audit log endpoints.
+ * Exposes read-only log endpoints.
+ * Week 2 undo endpoint lives in UndoController (Change 3).
  */
 @RestController
 public class LogController {
@@ -21,13 +21,11 @@ public class LogController {
         this.logManager = logManager;
     }
 
-    /** GET /api/command-log — View command log. */
     @GetMapping("/api/command-log")
     public List<CommandLogEntry> getCommandLog() {
         return logManager.getCommandLog();
     }
 
-    /** GET /api/audit-log — View audit log. */
     @GetMapping("/api/audit-log")
     public List<AuditLogEntry> getAuditLog() {
         return logManager.getAuditLog();

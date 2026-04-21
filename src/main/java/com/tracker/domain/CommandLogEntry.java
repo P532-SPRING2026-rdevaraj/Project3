@@ -28,9 +28,16 @@ public class CommandLogEntry {
     @Column(nullable = false)
     private Instant executedAt;
 
-    /** Hard-coded to "staff" for Week 1; Week 2 will inject the authenticated user. */
     @Column(nullable = false)
     private String user;
+
+    /** Observation affected by this command — used by the undo path (Change 3). */
+    @Column
+    private Long observationId;
+
+    /** True once this command has been undone — prevents double-undo (Change 3). */
+    @Column(nullable = false)
+    private boolean undone = false;
 
     public CommandLogEntry() {}
 
@@ -55,4 +62,10 @@ public class CommandLogEntry {
 
     public String getUser() { return user; }
     public void setUser(String user) { this.user = user; }
+
+    public Long getObservationId() { return observationId; }
+    public void setObservationId(Long observationId) { this.observationId = observationId; }
+
+    public boolean isUndone() { return undone; }
+    public void setUndone(boolean undone) { this.undone = undone; }
 }

@@ -6,7 +6,10 @@ import com.tracker.resourceaccess.ObservationRepository;
 
 /**
  * Command pattern — wraps the "reject observation" operation (F8).
- * Marks an observation as REJECTED with a free-text reason.
+ * Week 1 class, unchanged for Week 2.
+ * getPayload() already embeds observationId so AuditableCommandLog can
+ * parse the affected observation ID from the stored JSON without any new
+ * interface or method on this class.
  */
 public class RejectObservationCommand implements Command {
 
@@ -30,9 +33,7 @@ public class RejectObservationCommand implements Command {
     }
 
     @Override
-    public String getCommandType() {
-        return "REJECT_OBSERVATION";
-    }
+    public String getCommandType() { return "REJECT_OBSERVATION"; }
 
     @Override
     public String getPayload() {

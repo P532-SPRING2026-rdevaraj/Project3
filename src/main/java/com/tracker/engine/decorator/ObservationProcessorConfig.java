@@ -4,31 +4,29 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import java.time.Clock;
+
 /**
- * Decorator pattern — wiring configuration for the ObservationProcessor pipeline.
+ * Decorator pattern — wires the full processing pipeline (Change 2).
  *
- * Week 1: pipeline is a single PassThroughProcessor (no-op).
+ * Pipeline order (outermost → innermost):
+ *   AuditStampingDecorator
+ *     → AnomalyFlaggingDecorator
+ *       → UnitValidationDecorator
+ *         → BaseObservationProcessor
  *
- * Week 2: add a new decorator here by wrapping the existing chain, e.g.:
- *   return new UnitNormalizationDecorator(base);
- *
- * ObservationManager never needs to change — it always injects ObservationProcessor
- * and this config controls what that resolves to.
+ * ObservationManager never needs to change — it injects ObservationProcessor
+ * and this config controls what that bean resolves to.
  */
 @Configuration
 public class ObservationProcessorConfig {
 
-    /**
-     * Builds the processor pipeline.
-     * Week 1: just the pass-through.
-     * Week 2: wrap with additional decorators here.
-     */
     @Bean
     @Primary
-    public ObservationProcessor observationProcessor(PassThroughProcessor base) {
-        // Week 1: identity pipeline
-        return base;
-        // Week 2 example:
-        // return new UnitNormalizationDecorator(base);
+    public ObservationProcessor observationProcessor(BaseObservationProcessor base, Clock clock) {
+        return new AuditStampingDecorator(
+            new AnomalyFlaggingDecorator(
+                new UnitValidationDecorator(base)),
+            clock);
     }
 }

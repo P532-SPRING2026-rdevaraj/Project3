@@ -43,9 +43,18 @@ public abstract class Observation {
     @Column(nullable = false)
     private ObservationStatus status = ObservationStatus.ACTIVE;
 
-    /** Free-text rejection reason (Week 1). Week 2 can upgrade to a linked Observation. */
+    /** Free-text rejection reason. */
     @Column(columnDefinition = "TEXT")
     private String rejectionReason;
+
+    /** MANUAL = entered by staff; INFERRED = created by PropagationListener (Change 4). */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ObservationSource source = ObservationSource.MANUAL;
+
+    /** Set by AnomalyFlaggingDecorator when value is outside normalMin/normalMax (Change 2). */
+    @Column(nullable = false)
+    private boolean anomalyFlag = false;
 
     protected Observation() {}
 
@@ -78,7 +87,13 @@ public abstract class Observation {
     public String getRejectionReason() { return rejectionReason; }
     public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
 
-    /** Convenience: returns true when this observation should participate in rule evaluation. */
+    public ObservationSource getSource() { return source; }
+    public void setSource(ObservationSource source) { this.source = source; }
+
+    public boolean isAnomalyFlag() { return anomalyFlag; }
+    public void setAnomalyFlag(boolean anomalyFlag) { this.anomalyFlag = anomalyFlag; }
+
+    /** Returns true when this observation should participate in rule evaluation. */
     public boolean isActive() {
         return ObservationStatus.ACTIVE.equals(this.status);
     }

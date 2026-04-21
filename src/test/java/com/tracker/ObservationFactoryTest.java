@@ -92,24 +92,30 @@ class ObservationFactoryTest {
     }
 
     @Test
-    void createMeasurement_unitNotAllowed_throwsIllegalArgument() {
+    void createMeasurement_unitNotAllowed_factoryCreatesItAnyway() {
+        // Unit validation was moved to UnitValidationDecorator (Change 2).
+        // The factory no longer rejects invalid units — it trusts the decorator pipeline.
         // Arrange
         PhenomenonType tempType = quantType("Body Temperature", Set.of("°C"));
 
-        // Act & Assert
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-            () -> factory.createMeasurement(patient, tempType, 98.6, "°F", null, null));
-        assertTrue(ex.getMessage().contains("not allowed"));
+        // Act — should NOT throw from factory
+        Measurement m = factory.createMeasurement(patient, tempType, 98.6, "°F", null, null);
+
+        // Assert — created successfully; decorator would reject this at pipeline time
+        assertNotNull(m);
+        assertEquals("°F", m.getUnit());
     }
 
     @Test
-    void createMeasurement_emptyAllowedUnits_anyUnitRejected() {
-        // Arrange
-        PhenomenonType tempType = quantType("Unknown Quant", Set.of());
+    void createMeasurement_validUnit_returnsCorrectSource() {
+        // Arrange — factory must always set source=MANUAL (Change 4)
+        PhenomenonType tempType = quantType("Temperature", Set.of("°C"));
 
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class,
-            () -> factory.createMeasurement(patient, tempType, 1.0, "kg", null, null));
+        // Act
+        Measurement m = factory.createMeasurement(patient, tempType, 37.0, "°C", null, null);
+
+        // Assert
+        assertEquals(ObservationSource.MANUAL, m.getSource());
     }
 
     // ── CategoryObservation — happy path ───────────────────────────

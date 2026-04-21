@@ -5,7 +5,9 @@ import com.tracker.resourceaccess.ObservationRepository;
 
 /**
  * Command pattern — wraps the "record observation" operation (F3, F4).
- * Accepts a pre-built Observation (produced by ObservationFactory) and saves it.
+ * Week 1 class, unchanged for Week 2.
+ * AuditableCommandLog captures the saved observation's ID by calling
+ * getSavedObservation() after execute() — no interface change needed here.
  */
 public class RecordObservationCommand implements Command {
 
@@ -29,16 +31,10 @@ public class RecordObservationCommand implements Command {
     }
 
     @Override
-    public String getCommandType() {
-        return "RECORD_OBSERVATION";
-    }
+    public String getCommandType() { return "RECORD_OBSERVATION"; }
 
     @Override
-    public String getPayload() {
-        return payloadJson;
-    }
+    public String getPayload() { return payloadJson; }
 
-    public Observation getSavedObservation() {
-        return savedObservation;
-    }
+    public Observation getSavedObservation() { return savedObservation; }
 }

@@ -12,6 +12,12 @@
     <a href="index.html" class="active">Patients</a>
     <a href="catalogue.html">Catalogue</a>
     <a href="logs.html">Logs</a>
+    <span style="margin-left:auto;display:flex;align-items:center;gap:8px">
+        <label style="color:#fff;font-size:13px">User:</label>
+        <select id="user-select" style="padding:4px 8px;border-radius:4px;border:none;font-size:13px">
+            <option value="staff">staff</option>
+        </select>
+    </span>
 </nav>
 
 <div class="container">
@@ -66,6 +72,26 @@
 <script>
 const API = '/api';
 
+// ---- User context (Change 3) ----
+function currentUser() { return localStorage.getItem('currentUser') || 'staff'; }
+function apiHeaders() { return { 'Content-Type': 'application/json', 'X-Current-User': currentUser() }; }
+
+async function loadUsers() {
+    try {
+        const res = await fetch(`${API}/users`);
+        const users = await res.json();
+        const sel = document.getElementById('user-select');
+        sel.innerHTML = '<option value="staff">staff</option>';
+        users.forEach(u => {
+            if (u.username !== 'staff') sel.add(new Option(u.username + ' (' + u.role + ')', u.username));
+        });
+        sel.value = currentUser();
+    } catch(e) {}
+}
+document.getElementById('user-select').addEventListener('change', function() {
+    localStorage.setItem('currentUser', this.value);
+});
+
 function showAlert(msg, type = 'error') {
     const area = document.getElementById('alert-area');
     area.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
@@ -104,7 +130,7 @@ document.getElementById('add-patient-form').addEventListener('submit', async (e)
     try {
         const res = await fetch(`${API}/patients`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: apiHeaders(),
             body: JSON.stringify(body)
         });
         if (!res.ok) {
@@ -121,6 +147,7 @@ document.getElementById('add-patient-form').addEventListener('submit', async (e)
 });
 
 loadPatients();
+loadUsers();
 </script>
 </body>
 </html>

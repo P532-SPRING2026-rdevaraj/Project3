@@ -2,6 +2,7 @@ package com.tracker;
 
 import com.tracker.domain.*;
 import com.tracker.engine.DiagnosisEngine;
+import com.tracker.engine.strategy.DiagnosisStrategy;
 import com.tracker.engine.strategy.SimpleConjunctiveStrategy;
 import com.tracker.event.AuditLogListener;
 import com.tracker.event.ObservationEvent;
@@ -19,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,7 +47,9 @@ class ObserverListenerTest {
     @BeforeEach
     void setUp() {
         auditLogListener = new AuditLogListener(auditLogRepo);
-        diagnosisEngine = new DiagnosisEngine(new SimpleConjunctiveStrategy());
+        SimpleConjunctiveStrategy conjunctive = new SimpleConjunctiveStrategy();
+        Map<StrategyType, DiagnosisStrategy> strategyMap = Map.of(StrategyType.CONJUNCTIVE, conjunctive);
+        diagnosisEngine = new DiagnosisEngine(strategyMap);
         ruleEvaluationListener = new RuleEvaluationListener(
             ruleRepo, observationRepo, diagnosisEngine, auditLogRepo);
 

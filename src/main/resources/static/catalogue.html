@@ -12,6 +12,12 @@
     <a href="index.html">Patients</a>
     <a href="catalogue.html" class="active">Catalogue</a>
     <a href="logs.html">Logs</a>
+    <span style="margin-left:auto;display:flex;align-items:center;gap:8px">
+        <label style="color:#fff;font-size:13px">User:</label>
+        <select id="user-select" style="padding:4px 8px;border-radius:4px;border:none;font-size:13px">
+            <option value="staff">staff</option>
+        </select>
+    </span>
 </nav>
 
 <div class="container">
@@ -24,10 +30,10 @@
             <h2>Phenomenon Types</h2>
             <table id="pt-table">
                 <thead>
-                    <tr><th>ID</th><th>Name</th><th>Kind</th><th>Units / Phenomena</th></tr>
+                    <tr><th>ID</th><th>Name</th><th>Kind</th><th>Units / Phenomena</th><th>Normal Range</th></tr>
                 </thead>
                 <tbody id="pt-tbody">
-                    <tr><td colspan="4" class="empty-state">Loading…</td></tr>
+                    <tr><td colspan="5" class="empty-state">Loading…</td></tr>
                 </tbody>
             </table>
         </div>
@@ -51,6 +57,12 @@
                     <label>Allowed Units (comma-separated)</label>
                     <input type="text" id="pt-units" placeholder="°C, °F, K">
                 </div>
+                <div class="form-group" id="range-group" style="display:none">
+                    <label>Normal Min</label>
+                    <input type="number" step="any" id="pt-normal-min" placeholder="e.g. 36.1">
+                    <label style="margin-top:8px">Normal Max</label>
+                    <input type="number" step="any" id="pt-normal-max" placeholder="e.g. 37.2">
+                </div>
                 <div class="flex-end">
                     <button type="submit" class="btn btn-primary">Add</button>
                 </div>
@@ -69,6 +81,12 @@
                 <div class="form-group">
                     <label>Phenomenon Name *</label>
                     <input type="text" id="ph-name" required placeholder="e.g. Blood Group A">
+                </div>
+                <div class="form-group">
+                    <label>Parent Concept (optional)</label>
+                    <select id="ph-parent">
+                        <option value="">None</option>
+                    </select>
                 </div>
                 <div class="flex-end">
                     <button type="submit" class="btn btn-primary">Add Phenomenon</button>
@@ -124,10 +142,10 @@
             <h2>Diagnostic Rules (Associative Functions)</h2>
             <table id="rules-table">
                 <thead>
-                    <tr><th>ID</th><th>Name</th><th>Arguments</th><th>Infers</th><th>Active</th></tr>
+                    <tr><th>ID</th><th>Name</th><th>Strategy</th><th>Arguments</th><th>Infers</th><th>Active</th></tr>
                 </thead>
                 <tbody id="rules-tbody">
-                    <tr><td colspan="5" class="empty-state">Loading…</td></tr>
+                    <tr><td colspan="6" class="empty-state">Loading…</td></tr>
                 </tbody>
             </table>
         </div>
@@ -140,9 +158,23 @@
                     <input type="text" id="rule-name" required placeholder="e.g. Fever + High Glucose → Diabetes Risk">
                 </div>
                 <div class="form-group">
+                    <label>Strategy *</label>
+                    <select id="rule-strategy" required>
+                        <option value="CONJUNCTIVE">CONJUNCTIVE — all arguments must be present</option>
+                        <option value="WEIGHTED">WEIGHTED — weighted sum exceeds threshold</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Argument Concepts (PhenomenonType IDs, comma-separated) *</label>
                     <input type="text" id="rule-args" required placeholder="1,2">
                     <span class="muted">IDs from the Phenomenon Types table above.</span>
+                </div>
+                <div class="form-group" id="weights-group" style="display:none">
+                    <label>Weights (conceptId:weight, comma-separated)</label>
+                    <input type="text" id="rule-weights" placeholder="1:0.6,2:0.4">
+                    <span class="muted">Leave blank to use default weight 1.0 for each concept.</span>
+                    <label style="margin-top:8px">Threshold *</label>
+                    <input type="number" step="any" id="rule-threshold" value="0.5" placeholder="0.5">
                 </div>
                 <div class="form-group">
                     <label>Inferred Concept (PhenomenonType ID) *</label>
@@ -160,6 +192,26 @@
 const API = '/api';
 let allPhenomenonTypes = [];
 let allPhenomenonTypesById = {};
+let allPhenomena = [];
+
+function currentUser() { return localStorage.getItem('currentUser') || 'staff'; }
+function apiHeaders() { return { 'Content-Type': 'application/json', 'X-Current-User': currentUser() }; }
+
+async function loadUsers() {
+    try {
+        const res = await fetch(`${API}/users`);
+        const users = await res.json();
+        const sel = document.getElementById('user-select');
+        sel.innerHTML = '<option value="staff">staff</option>';
+        users.forEach(u => {
+            if (u.username !== 'staff') sel.add(new Option(u.username + ' (' + u.role + ')', u.username));
+        });
+        sel.value = currentUser();
+    } catch(e) {}
+}
+document.getElementById('user-select').addEventListener('change', function() {
+    localStorage.setItem('currentUser', this.value);
+});
 
 function showAlert(msg, type = 'error') {
     const area = document.getElementById('alert-area');
@@ -172,14 +224,20 @@ async function loadPhenomenonTypes() {
     const res = await fetch(`${API}/phenomenon-types`);
     allPhenomenonTypes = await res.json();
     allPhenomenonTypesById = {};
-    allPhenomenonTypes.forEach(pt => { allPhenomenonTypesById[pt.id] = pt; });
+    allPhenomena = [];
+    allPhenomenonTypes.forEach(pt => {
+        allPhenomenonTypesById[pt.id] = pt;
+        if (pt.phenomena) allPhenomena.push(...pt.phenomena);
+    });
 
     const tbody = document.getElementById('pt-tbody');
     const phSel = document.getElementById('ph-type');
+    const phParentSel = document.getElementById('ph-parent');
     phSel.innerHTML = '<option value="">Select…</option>';
+    phParentSel.innerHTML = '<option value="">None</option>';
 
     if (!allPhenomenonTypes.length) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No phenomenon types yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No phenomenon types yet.</td></tr>';
         return;
     }
     tbody.innerHTML = allPhenomenonTypes.map(pt => {
@@ -189,16 +247,22 @@ async function loadPhenomenonTypes() {
         const extra = pt.kind === 'QUANTITATIVE'
             ? (pt.allowedUnitsRaw || '—')
             : (pt.phenomena || []).map(ph => ph.name).join(', ') || '—';
-        return `<tr><td>${pt.id}</td><td>${pt.name}</td><td>${kindBadge}</td><td>${extra}</td></tr>`;
+        const range = pt.kind === 'QUANTITATIVE' && (pt.normalMin != null || pt.normalMax != null)
+            ? `${pt.normalMin ?? '?'} – ${pt.normalMax ?? '?'}`
+            : '—';
+        return `<tr><td>${pt.id}</td><td>${pt.name}</td><td>${kindBadge}</td><td>${extra}</td><td>${range}</td></tr>`;
     }).join('');
 
     allPhenomenonTypes.filter(pt => pt.kind === 'QUALITATIVE')
         .forEach(pt => phSel.add(new Option(pt.name, pt.id)));
+
+    allPhenomena.forEach(ph => phParentSel.add(new Option(ph.name, ph.id)));
 }
 
 document.getElementById('pt-kind').addEventListener('change', function () {
-    document.getElementById('units-group').style.display =
-        this.value === 'QUANTITATIVE' ? 'block' : 'none';
+    const isQuant = this.value === 'QUANTITATIVE';
+    document.getElementById('units-group').style.display = isQuant ? 'block' : 'none';
+    document.getElementById('range-group').style.display = isQuant ? 'block' : 'none';
 });
 
 document.getElementById('pt-form').addEventListener('submit', async (e) => {
@@ -208,25 +272,36 @@ document.getElementById('pt-form').addEventListener('submit', async (e) => {
     const allowedUnits = kind === 'QUANTITATIVE' && unitsRaw
         ? unitsRaw.split(',').map(u => u.trim()).filter(Boolean)
         : [];
-    const body = { name: document.getElementById('pt-name').value.trim(), kind, allowedUnits };
+    const normalMinVal = document.getElementById('pt-normal-min').value;
+    const normalMaxVal = document.getElementById('pt-normal-max').value;
+    const body = {
+        name: document.getElementById('pt-name').value.trim(),
+        kind,
+        allowedUnits,
+        normalMin: normalMinVal ? parseFloat(normalMinVal) : null,
+        normalMax: normalMaxVal ? parseFloat(normalMaxVal) : null
+    };
     const res = await fetch(`${API}/phenomenon-types`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+        method: 'POST', headers: apiHeaders(), body: JSON.stringify(body)
     });
     if (!res.ok) { const e2 = await res.json(); showAlert(e2.error || 'Error'); return; }
     e.target.reset();
     document.getElementById('units-group').style.display = 'none';
+    document.getElementById('range-group').style.display = 'none';
     showAlert('Phenomenon type created.', 'success');
     loadPhenomenonTypes();
 });
 
 document.getElementById('ph-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const parentVal = document.getElementById('ph-parent').value;
     const body = {
         name: document.getElementById('ph-name').value.trim(),
-        phenomenonTypeId: parseInt(document.getElementById('ph-type').value)
+        phenomenonTypeId: parseInt(document.getElementById('ph-type').value),
+        parentConceptId: parentVal ? parseInt(parentVal) : null
     };
     const res = await fetch(`${API}/phenomenon-types/phenomena`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+        method: 'POST', headers: apiHeaders(), body: JSON.stringify(body)
     });
     if (!res.ok) { const e2 = await res.json(); showAlert(e2.error || 'Error'); return; }
     e.target.reset();
@@ -257,7 +332,7 @@ document.getElementById('proto-form').addEventListener('submit', async (e) => {
         accuracyRating: document.getElementById('proto-accuracy').value
     };
     const res = await fetch(`${API}/protocols`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+        method: 'POST', headers: apiHeaders(), body: JSON.stringify(body)
     });
     if (!res.ok) { const e2 = await res.json(); showAlert(e2.error || 'Error'); return; }
     e.target.reset();
@@ -266,12 +341,17 @@ document.getElementById('proto-form').addEventListener('submit', async (e) => {
 });
 
 // ---- Diagnostic Rules ----
+document.getElementById('rule-strategy').addEventListener('change', function () {
+    document.getElementById('weights-group').style.display =
+        this.value === 'WEIGHTED' ? 'block' : 'none';
+});
+
 async function loadRules() {
     const res = await fetch(`${API}/rules`);
     const rules = await res.json();
     const tbody = document.getElementById('rules-tbody');
     if (!rules.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No rules yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No rules yet.</td></tr>';
         return;
     }
     tbody.innerHTML = rules.map(r => {
@@ -285,30 +365,48 @@ async function loadRules() {
         const activeBadge = r.active
             ? '<span class="badge badge-active">YES</span>'
             : '<span class="badge badge-rejected">NO</span>';
-        return `<tr><td>${r.id}</td><td>${r.name}</td><td>${argNames}</td><td>${prodName}</td><td>${activeBadge}</td></tr>`;
+        const strategyBadge = r.strategyType === 'WEIGHTED'
+            ? `<span class="badge" style="background:#8b5cf6;color:#fff">WEIGHTED</span>`
+            : `<span class="badge" style="background:#3b82f6;color:#fff">CONJUNCTIVE</span>`;
+        return `<tr><td>${r.id}</td><td>${r.name}</td><td>${strategyBadge}</td><td>${argNames}</td><td>${prodName}</td><td>${activeBadge}</td></tr>`;
     }).join('');
 }
 
 document.getElementById('rule-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const strategy = document.getElementById('rule-strategy').value;
     const argIds = document.getElementById('rule-args').value
         .split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+    const weightsRaw = document.getElementById('rule-weights').value.trim();
+    const weightsMap = {};
+    if (strategy === 'WEIGHTED' && weightsRaw) {
+        weightsRaw.split(',').forEach(part => {
+            const [id, w] = part.split(':');
+            if (id && w) weightsMap[parseInt(id.trim())] = parseFloat(w.trim());
+        });
+    }
+    const thresholdVal = document.getElementById('rule-threshold').value;
     const body = {
         name: document.getElementById('rule-name').value.trim(),
         argumentConceptIds: argIds,
-        productConceptId: parseInt(document.getElementById('rule-product').value)
+        productConceptId: parseInt(document.getElementById('rule-product').value),
+        strategyType: strategy,
+        weightsMap: Object.keys(weightsMap).length ? weightsMap : null,
+        threshold: strategy === 'WEIGHTED' && thresholdVal ? parseFloat(thresholdVal) : null
     };
     const res = await fetch(`${API}/rules`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+        method: 'POST', headers: apiHeaders(), body: JSON.stringify(body)
     });
     if (!res.ok) { const e2 = await res.json(); showAlert(e2.error || 'Error'); return; }
     e.target.reset();
+    document.getElementById('weights-group').style.display = 'none';
     showAlert('Diagnostic rule created.', 'success');
     loadRules();
 });
 
 // ---- Init ----
 (async () => {
+    await loadUsers();
     await loadPhenomenonTypes();
     await loadProtocols();
     await loadRules();

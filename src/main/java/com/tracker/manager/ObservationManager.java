@@ -19,12 +19,8 @@ import java.util.List;
 /**
  * Manager layer — orchestrates observation use-cases (F3, F4, F7, F8).
  *
- * Publishes ObservationEvents via Spring's ApplicationEventPublisher so
- * AuditLogListener and RuleEvaluationListener react automatically (Observer).
- *
- * Delegates object creation exclusively to ObservationFactory (Factory).
- * Wraps every state change in a Command object logged via CommandLog (Command).
- * Applies the ObservationProcessor pipeline after creation (Decorator).
+ * Change 2: passes ApplicationEventPublisher to commands so undo() can fire events.
+ * Change 4: ObservationFactory.createCategoryObservation source=MANUAL (default).
  */
 @Service
 public class ObservationManager {
@@ -56,30 +52,25 @@ public class ObservationManager {
         this.protocolManager = protocolManager;
     }
 
-    /** Lists all observations for a patient in reverse-chronological order (F7). */
     public List<Observation> listForPatient(Long patientId) {
         return observationRepository.findByPatientIdOrderByRecordingTimeDesc(patientId);
     }
 
-    /** Records a quantitative measurement (F3). */
     public Observation recordMeasurement(MeasurementRequest request) {
         Patient patient = patientManager.findById(request.getPatientId());
         PhenomenonType phenomenonType = phenomenonTypeManager.findById(request.getPhenomenonTypeId());
         Protocol protocol = request.getProtocolId() != null
             ? protocolManager.findById(request.getProtocolId()) : null;
 
-        // Factory validates and constructs — manager trusts the result
         Measurement measurement = observationFactory.createMeasurement(
             patient, phenomenonType, request.getAmount(), request.getUnit(),
-            protocol, request.getApplicabilityTime()
-        );
+            protocol, request.getApplicabilityTime());
 
-        // Decorator pipeline (no-op in Week 1; extended in Week 2)
+        // Decorator pipeline: AuditStamping → AnomalyFlagging → UnitValidation → Base
         Observation processed = observationProcessor.process(measurement);
 
-        String payload = buildMeasurementPayload(request);
         RecordObservationCommand cmd = new RecordObservationCommand(
-            observationRepository, processed, payload);
+            observationRepository, processed, buildMeasurementPayload(request));
         commandLog.execute(cmd);
 
         Observation saved = cmd.getSavedObservation();
@@ -87,24 +78,19 @@ public class ObservationManager {
         return saved;
     }
 
-    /** Records a qualitative category observation (F4). */
     public Observation recordCategoryObservation(CategoryObservationRequest request) {
         Patient patient = patientManager.findById(request.getPatientId());
         Phenomenon phenomenon = phenomenonTypeManager.findPhenomenonById(request.getPhenomenonId());
         Protocol protocol = request.getProtocolId() != null
             ? protocolManager.findById(request.getProtocolId()) : null;
 
-        // Factory validates and constructs
         CategoryObservation catObs = observationFactory.createCategoryObservation(
-            patient, phenomenon, request.getPresence(), protocol, request.getApplicabilityTime()
-        );
+            patient, phenomenon, request.getPresence(), protocol, request.getApplicabilityTime());
 
-        // Decorator pipeline
         Observation processed = observationProcessor.process(catObs);
 
-        String payload = buildCategoryPayload(request);
         RecordObservationCommand cmd = new RecordObservationCommand(
-            observationRepository, processed, payload);
+            observationRepository, processed, buildCategoryPayload(request));
         commandLog.execute(cmd);
 
         Observation saved = cmd.getSavedObservation();
@@ -112,14 +98,11 @@ public class ObservationManager {
         return saved;
     }
 
-    /** Marks an observation as rejected (F8). */
     public Observation reject(Long observationId, RejectObservationRequest request) {
         Observation obs = observationRepository.findById(observationId)
             .orElseThrow(() -> new IllegalArgumentException("Observation not found: " + observationId));
 
-        if (!obs.isActive()) {
-            throw new IllegalStateException("Observation is already rejected");
-        }
+        if (!obs.isActive()) throw new IllegalStateException("Observation is already rejected");
 
         RejectObservationCommand cmd = new RejectObservationCommand(
             observationRepository, obs, request.getReason());
@@ -128,8 +111,6 @@ public class ObservationManager {
         eventPublisher.publishEvent(new ObservationEvent(this, obs, ObservationEvent.Type.REJECTED));
         return obs;
     }
-
-    // --- helpers ---------------------------------------------------------------
 
     private String buildMeasurementPayload(MeasurementRequest r) {
         return "{\"patientId\":" + r.getPatientId()
