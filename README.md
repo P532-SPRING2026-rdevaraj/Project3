@@ -2,48 +2,55 @@
 
 [![CI](https://github.com/RohithGowdaD/Project3/actions/workflows/ci.yml/badge.svg)](https://github.com/RohithGowdaD/Project3/actions/workflows/ci.yml)
 
-**CSCI-P532 Object Oriented Software Development — Spring 2026 — Project 3, Week 1**
+**CSCI-P532 Object Oriented Software Development — Spring 2026 — Project 3, Week 2**
 
 A lightweight clinical-record system built with Spring Boot 3, Spring Data JPA, SQLite, and plain HTML/JS.  
 Inspired by the Observations and Measurements patterns (Fowler, *Analysis Patterns*, Chapter 3) and the Accountability patterns (Chapter 2).
 
 ---
 
-## Live Links
+## Live Deployments
 
-**Full App:** https://project3-ywcp.onrender.com
+|  | Week 1 (`main`) | Week 2 (`week2`) |
+|---|---|---|
+| **Full App** | [p532-spring2026-rdevaraj.github.io/Project3](https://p532-spring2026-rdevaraj.github.io/Project3) | [project3-week2.onrender.com](https://project3-week2.onrender.com) |
+| **Backend API** | [project3-ywcp.onrender.com/api/patients](https://project3-ywcp.onrender.com/api/patients) | [project3-week2.onrender.com/api/patients](https://project3-week2.onrender.com/api/patients) |
 
-### Frontend (GitHub Pages)
-
-| Page | URL |
-|------|-----|
-| Patients (Home) | https://p532-spring2026-rdevaraj.github.io/Project3/index.html |
-| Patient Detail | https://p532-spring2026-rdevaraj.github.io/Project3/patient.html |
-| Catalogue | https://p532-spring2026-rdevaraj.github.io/Project3/catalogue.html |
-| Logs | https://p532-spring2026-rdevaraj.github.io/Project3/logs.html |
-
-### Backend (Render.com)
+### Week 1 API endpoints (`main`)
 
 > Base URL: `https://project3-ywcp.onrender.com`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | https://project3-ywcp.onrender.com/api/patients | List all patients |
-| POST | https://project3-ywcp.onrender.com/api/patients | Create patient |
-| GET | https://project3-ywcp.onrender.com/api/patients/{id}/observations | List observations for patient |
-| POST | https://project3-ywcp.onrender.com/api/observations/measurement | Record measurement |
-| POST | https://project3-ywcp.onrender.com/api/observations/category | Record category observation |
-| POST | https://project3-ywcp.onrender.com/api/observations/{id}/reject | Reject observation |
-| POST | https://project3-ywcp.onrender.com/api/patients/{id}/evaluate | Run diagnostic rules |
-| GET | https://project3-ywcp.onrender.com/api/phenomenon-types | List phenomenon types |
-| POST | https://project3-ywcp.onrender.com/api/phenomenon-types | Create phenomenon type |
-| POST | https://project3-ywcp.onrender.com/api/phenomenon-types/phenomena | Add phenomenon to type |
-| GET | https://project3-ywcp.onrender.com/api/protocols | List protocols |
-| POST | https://project3-ywcp.onrender.com/api/protocols | Create protocol |
-| GET | https://project3-ywcp.onrender.com/api/rules | List diagnostic rules |
-| POST | https://project3-ywcp.onrender.com/api/rules | Create diagnostic rule |
-| GET | https://project3-ywcp.onrender.com/api/command-log | View command log |
-| GET | https://project3-ywcp.onrender.com/api/audit-log | View audit log |
+| GET | `/api/patients` | List all patients |
+| POST | `/api/patients` | Create patient |
+| GET | `/api/patients/{id}/observations` | List observations for patient |
+| POST | `/api/patients/{id}/evaluate` | Run diagnostic rules |
+| POST | `/api/observations/measurement` | Record measurement |
+| POST | `/api/observations/category` | Record category observation |
+| POST | `/api/observations/{id}/reject` | Reject observation |
+| GET | `/api/phenomenon-types` | List phenomenon types |
+| POST | `/api/phenomenon-types` | Create phenomenon type |
+| POST | `/api/phenomenon-types/phenomena` | Add phenomenon to type |
+| GET | `/api/protocols` | List protocols |
+| POST | `/api/protocols` | Create protocol |
+| GET | `/api/rules` | List diagnostic rules |
+| POST | `/api/rules` | Create diagnostic rule |
+| GET | `/api/command-log` | View command log |
+| GET | `/api/audit-log` | View audit log |
+
+### Week 2 API endpoints (`week2`)
+
+> Base URL: `https://project3-week2.onrender.com`
+
+Includes all Week 1 endpoints plus:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/users` | List all users |
+| POST | `/api/users` | Create user |
+| GET | `/api/users/current` | Current acting user |
+| POST | `/api/command-log/{id}/undo` | Undo a recorded or rejected observation |
 
 ---
 
@@ -153,4 +160,4 @@ Four-layer architecture enforced throughout:
 mvn test
 ```
 
-28 unit tests covering `ObservationFactory`, `SimpleConjunctiveStrategy`, Command objects, and Observer listeners. No `@SpringBootTest` in unit tests.
+52 unit tests covering `ObservationFactory`, `SimpleConjunctiveStrategy`, `WeightedScoringStrategy`, Decorator pipeline, Command objects, Observer listeners, `AuditableCommandLog`, `UndoManager`, and `PropagationListener`. No `@SpringBootTest` in unit tests.
