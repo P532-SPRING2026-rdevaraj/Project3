@@ -8,12 +8,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 
-/**
- * Command pattern — stores every executed Command in the database.
- * Week 1: records user as "staff" (hard-coded).
- * Week 2 extension: AuditableCommandLog overrides execute() to read the
- * real user from UserContextHolder and persist the affected observationId.
- */
 @Service
 public class CommandLog {
 

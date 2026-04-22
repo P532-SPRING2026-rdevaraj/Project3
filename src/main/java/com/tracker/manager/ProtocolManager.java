@@ -7,9 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * Manager layer — orchestrates protocol use-cases (F5).
- */
 @Service
 public class ProtocolManager {
 

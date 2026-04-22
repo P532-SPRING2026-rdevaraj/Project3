@@ -5,11 +5,6 @@ import com.tracker.domain.Observation;
 import java.time.Clock;
 import java.time.Instant;
 
-/**
- * Decorator pattern — Change 2.
- * Stamps the definitive recording timestamp onto the observation before persistence.
- * The acting user is tracked separately in CommandLog via UserContextHolder.
- */
 public class AuditStampingDecorator extends ObservationProcessorDecorator {
 
     private final Clock clock;

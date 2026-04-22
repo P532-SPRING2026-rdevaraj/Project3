@@ -4,13 +4,6 @@ import com.tracker.domain.Measurement;
 import com.tracker.domain.Observation;
 import com.tracker.domain.PhenomenonType;
 
-/**
- * Decorator pattern — Change 2.
- * Compares the incoming measurement value against the normalMin/normalMax range
- * stored on the phenomenon type. If outside the range, sets anomalyFlag=true
- * on the observation. Anomalous observations are persisted normally; the flag
- * is stored and displayed in the UI.
- */
 public class AnomalyFlaggingDecorator extends ObservationProcessorDecorator {
 
     public AnomalyFlaggingDecorator(ObservationProcessor delegate) {

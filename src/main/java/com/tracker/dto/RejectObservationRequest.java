@@ -1,6 +1,5 @@
 package com.tracker.dto;
 
-/** Request body for POST /api/observations/{id}/reject (F8). */
 public class RejectObservationRequest {
     private String reason;
 

@@ -9,12 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * Manager layer — orchestrates patient use-case sequences (F1).
- *
- * Delegates persistence to PatientRepository and wraps every state-change
- * in a Command object that is logged via CommandLog.
- */
 @Service
 public class PatientManager {
 
@@ -26,18 +20,15 @@ public class PatientManager {
         this.commandLog = commandLog;
     }
 
-    /** Returns all patients (F1). */
     public List<Patient> listAll() {
         return patientRepository.findAll();
     }
 
-    /** Finds a patient by ID or throws (used internally). */
     public Patient findById(Long id) {
         return patientRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Patient not found: " + id));
     }
 
-    /** Creates and persists a new patient, logging the command (F1). */
     public Patient create(PatientRequest request) {
         CreatePatientCommand cmd = new CreatePatientCommand(
             patientRepository,

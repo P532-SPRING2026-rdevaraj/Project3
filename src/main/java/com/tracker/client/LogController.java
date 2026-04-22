@@ -7,11 +7,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Client layer — HTTP only, zero business logic.
- * Exposes read-only log endpoints.
- * Week 2 undo endpoint lives in UndoController (Change 3).
- */
 @RestController
 public class LogController {
 

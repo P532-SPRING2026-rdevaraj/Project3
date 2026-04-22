@@ -3,14 +3,6 @@ package com.tracker.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 
-/**
- * Operational-level entity for a quantitative observation.
- * Links to a QUANTITATIVE PhenomenonType and records a numeric amount + unit.
- * F3: Record a measurement.
- *
- * All instances must be created via ObservationFactory (Factory pattern).
- * Controllers must never call new Measurement(...) directly.
- */
 @Entity
 @Table(name = "measurements")
 @PrimaryKeyJoinColumn(name = "observation_id")

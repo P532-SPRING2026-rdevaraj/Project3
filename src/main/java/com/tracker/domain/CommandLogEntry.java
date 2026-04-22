@@ -3,13 +3,6 @@ package com.tracker.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 
-/**
- * Persisted record of every executed Command object.
- * Command pattern — audit trail of state-changing operations.
- *
- * The payload is stored as a JSON string so the undo path in Week 2 can
- * reconstruct the original request without changing the schema.
- */
 @Entity
 @Table(name = "command_log_entries")
 public class CommandLogEntry {
@@ -21,7 +14,6 @@ public class CommandLogEntry {
     @Column(nullable = false)
     private String commandType;
 
-    /** JSON payload capturing the full request so Week 2 undo can replay it. */
     @Column(nullable = false, columnDefinition = "TEXT")
     private String payload;
 
@@ -31,11 +23,9 @@ public class CommandLogEntry {
     @Column(nullable = false)
     private String user;
 
-    /** Observation affected by this command — used by the undo path (Change 3). */
     @Column
     private Long observationId;
 
-    /** True once this command has been undone — prevents double-undo (Change 3). */
     @Column(nullable = false)
     private boolean undone = false;
 

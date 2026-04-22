@@ -2,10 +2,6 @@ package com.tracker.domain;
 
 import jakarta.persistence.*;
 
-/**
- * Simple user entity replacing the hard-coded "staff" user (Change 3).
- * No full authentication — a login dropdown in the UI sets the current user.
- */
 @Entity
 @Table(name = "app_users")
 public class AppUser {

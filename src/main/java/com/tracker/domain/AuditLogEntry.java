@@ -3,10 +3,6 @@ package com.tracker.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 
-/**
- * Observer pattern — persisted record of every observation lifecycle event.
- * Written by AuditLogListener when an ObservationEvent is published.
- */
 @Entity
 @Table(name = "audit_log_entries")
 public class AuditLogEntry {
@@ -15,7 +11,6 @@ public class AuditLogEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Human-readable description of the event (e.g. "OBSERVATION_CREATED", "OBSERVATION_REJECTED"). */
     @Column(nullable = false)
     private String event;
 
@@ -28,7 +23,6 @@ public class AuditLogEntry {
     @Column(nullable = false)
     private Instant timestamp;
 
-    /** Optional extra detail (e.g. inferred concepts from RuleEvaluationListener). */
     @Column(columnDefinition = "TEXT")
     private String detail;
 

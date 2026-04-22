@@ -3,14 +3,6 @@ package com.tracker.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 
-/**
- * Operational-level entity for a qualitative observation.
- * Links to a knowledge-level Phenomenon and records PRESENT or ABSENT.
- * F4: Record a category observation.
- *
- * All instances must be created via ObservationFactory (Factory pattern).
- * Controllers must never call new CategoryObservation(...) directly.
- */
 @Entity
 @Table(name = "category_observations")
 @PrimaryKeyJoinColumn(name = "observation_id")

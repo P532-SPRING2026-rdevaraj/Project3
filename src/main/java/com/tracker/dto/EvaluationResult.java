@@ -4,10 +4,6 @@ import com.tracker.domain.StrategyType;
 
 import java.util.List;
 
-/**
- * Response DTO for the "Evaluate rules" endpoint (Change 1).
- * Returns the inferred concept, which strategy fired it, and contributing observation IDs.
- */
 public class EvaluationResult {
 
     private String inferredConcept;

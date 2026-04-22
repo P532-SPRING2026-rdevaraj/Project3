@@ -7,15 +7,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 
-/**
- * Observer pattern — Listener 1 of 2.
- *
- * Appends an AuditLogEntry to the database whenever an ObservationEvent is
- * published. Completely decoupled from ObservationManager via Spring events.
- *
- * Adding further listeners in Week 2 (e.g. PropagationListener) requires
- * only a new @Component with @EventListener — zero changes here.
- */
 @Component
 public class AuditLogListener {
 

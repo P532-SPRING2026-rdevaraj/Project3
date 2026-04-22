@@ -2,15 +2,12 @@ package com.tracker.dto;
 
 import java.time.Instant;
 
-/** Request body for POST /api/observations/measurement (F3). */
 public class MeasurementRequest {
     private Long patientId;
     private Long phenomenonTypeId;
     private Double amount;
     private String unit;
-    /** Optional protocol reference. */
     private Long protocolId;
-    /** Defaults to now if not provided. */
     private Instant applicabilityTime;
 
     public Long getPatientId() { return patientId; }

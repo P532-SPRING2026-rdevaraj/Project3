@@ -3,16 +3,6 @@ package com.tracker.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 
-/**
- * Abstract operational-level base entity for all observations.
- * Concrete subtypes: Measurement (quantitative) and CategoryObservation (qualitative).
- *
- * Uses JPA JOINED inheritance so each subtype has its own table while sharing
- * the common columns here. This makes adding new subtypes in Week 2 a zero-touch
- * change to this class.
- *
- * F3, F4, F7, F8.
- */
 @Entity
 @Table(name = "observations")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -26,15 +16,12 @@ public abstract class Observation {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    /** System timestamp: when the record was entered into the system. */
     @Column(nullable = false)
     private Instant recordingTime;
 
-    /** Clinical timestamp: when the observation was actually taken (entered by staff). */
     @Column(nullable = false)
     private Instant applicabilityTime;
 
-    /** Optional protocol used when taking this observation. */
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "protocol_id")
     private Protocol protocol;
@@ -43,16 +30,13 @@ public abstract class Observation {
     @Column(nullable = false)
     private ObservationStatus status = ObservationStatus.ACTIVE;
 
-    /** Free-text rejection reason. */
     @Column(columnDefinition = "TEXT")
     private String rejectionReason;
 
-    /** MANUAL = entered by staff; INFERRED = created by PropagationListener (Change 4). */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ObservationSource source = ObservationSource.MANUAL;
 
-    /** Set by AnomalyFlaggingDecorator when value is outside normalMin/normalMax (Change 2). */
     @Column(nullable = false)
     private boolean anomalyFlag = false;
 
@@ -93,7 +77,6 @@ public abstract class Observation {
     public boolean isAnomalyFlag() { return anomalyFlag; }
     public void setAnomalyFlag(boolean anomalyFlag) { this.anomalyFlag = anomalyFlag; }
 
-    /** Returns true when this observation should participate in rule evaluation. */
     public boolean isActive() {
         return ObservationStatus.ACTIVE.equals(this.status);
     }

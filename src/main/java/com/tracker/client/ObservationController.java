@@ -9,10 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Client layer — HTTP only, zero business logic.
- * Change 1: evaluate endpoint returns List<EvaluationResult> (strategy + evidence).
- */
 @RestController
 public class ObservationController {
 
@@ -53,7 +49,6 @@ public class ObservationController {
         return ObservationResponse.from(obs);
     }
 
-    /** POST /api/patients/{id}/evaluate — returns inferred concepts with strategy and evidence (Change 1). */
     @PostMapping("/api/patients/{id}/evaluate")
     public List<EvaluationResult> evaluate(@PathVariable Long id) {
         return diagnosticRuleManager.evaluateForPatient(id);

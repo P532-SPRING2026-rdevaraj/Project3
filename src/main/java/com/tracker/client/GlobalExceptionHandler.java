@@ -8,10 +8,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 
-/**
- * Client layer — translates domain exceptions to HTTP error responses.
- * Keeps business logic out of controllers by centralising error mapping here.
- */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

@@ -3,34 +3,26 @@ package com.tracker.dto;
 import com.tracker.domain.*;
 import java.time.Instant;
 
-
-/**
- * Unified response DTO for any Observation (Measurement or CategoryObservation).
- * The controller maps domain objects here — never exposes JPA entities directly.
- */
 public class ObservationResponse {
 
     private Long id;
-    private String type;           // "MEASUREMENT" or "CATEGORY"
+    private String type;
     private Long patientId;
     private Instant recordingTime;
     private Instant applicabilityTime;
     private ObservationStatus status;
     private String rejectionReason;
-    private ObservationSource source;   // MANUAL or INFERRED (Change 4)
-    private boolean anomalyFlag;        // true when outside normalMin/normalMax (Change 2)
+    private ObservationSource source;
+    private boolean anomalyFlag;
 
-    // Protocol (optional)
     private Long protocolId;
     private String protocolName;
 
-    // Measurement fields
     private Long phenomenonTypeId;
     private String phenomenonTypeName;
     private Double amount;
     private String unit;
 
-    // CategoryObservation fields
     private Long phenomenonId;
     private String phenomenonName;
     private Presence presence;

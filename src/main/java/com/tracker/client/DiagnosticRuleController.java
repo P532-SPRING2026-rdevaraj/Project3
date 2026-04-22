@@ -8,10 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Client layer — HTTP only, zero business logic.
- * Manages AssociativeFunction (diagnostic rule) CRUD.
- */
 @RestController
 @RequestMapping("/api/rules")
 public class DiagnosticRuleController {
@@ -22,13 +18,11 @@ public class DiagnosticRuleController {
         this.diagnosticRuleManager = diagnosticRuleManager;
     }
 
-    /** GET /api/rules — List all rules. */
     @GetMapping
     public List<AssociativeFunction> listAll() {
         return diagnosticRuleManager.listAll();
     }
 
-    /** POST /api/rules — Create a diagnostic rule. */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public AssociativeFunction create(@RequestBody AssociativeFunctionRequest request) {

@@ -2,13 +2,6 @@ package com.tracker.domain;
 
 import jakarta.persistence.*;
 
-/**
- * Knowledge-level entity describing a clinical measurement protocol.
- * F5: Protocol catalogue.
- *
- * Any observation may optionally reference a protocol.
- * Accuracy rating reflects protocol reliability: HIGH / MEDIUM / LOW.
- */
 @Entity
 @Table(name = "protocols")
 public class Protocol {

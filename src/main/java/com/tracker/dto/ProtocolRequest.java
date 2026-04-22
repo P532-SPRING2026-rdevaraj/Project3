@@ -2,7 +2,6 @@ package com.tracker.dto;
 
 import com.tracker.domain.AccuracyRating;
 
-/** Request body for POST /api/protocols (F5). */
 public class ProtocolRequest {
     private String name;
     private String description;

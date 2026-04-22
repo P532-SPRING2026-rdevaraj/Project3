@@ -16,12 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * Manager layer — orchestrates observation use-cases (F3, F4, F7, F8).
- *
- * Change 2: passes ApplicationEventPublisher to commands so undo() can fire events.
- * Change 4: ObservationFactory.createCategoryObservation source=MANUAL (default).
- */
 @Service
 public class ObservationManager {
 
@@ -66,7 +60,6 @@ public class ObservationManager {
             patient, phenomenonType, request.getAmount(), request.getUnit(),
             protocol, request.getApplicabilityTime());
 
-        // Decorator pipeline: AuditStamping → AnomalyFlagging → UnitValidation → Base
         Observation processed = observationProcessor.process(measurement);
 
         RecordObservationCommand cmd = new RecordObservationCommand(

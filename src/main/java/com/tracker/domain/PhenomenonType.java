@@ -6,15 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Knowledge-level entity representing a type of phenomenon that can be observed.
- * Examples: body temperature (QUANTITATIVE), blood group (QUALITATIVE).
- * F2: Phenomenon-type catalogue.
- *
- * This is strictly at the knowledge level — created by staff, rarely changes,
- * and is never created as a side-effect of recording an observation.
- * (Fowler Analysis Patterns Chapter 3)
- */
 @Entity
 @Table(name = "phenomenon_types")
 public class PhenomenonType {
@@ -30,25 +21,15 @@ public class PhenomenonType {
     @Column(nullable = false)
     private MeasurementKind kind;
 
-    /**
-     * Allowed units for QUANTITATIVE types (e.g., "°C", "mg/dL", "mmHg").
-     * Stored as a comma-separated string for SQLite compatibility.
-     */
     @Column(columnDefinition = "TEXT")
     private String allowedUnitsRaw;
 
-    /** Normal range lower bound for QUANTITATIVE types — used by AnomalyFlaggingDecorator (Change 2). */
     @Column
     private Double normalMin;
 
-    /** Normal range upper bound for QUANTITATIVE types — used by AnomalyFlaggingDecorator (Change 2). */
     @Column
     private Double normalMax;
 
-    /**
-     * Phenomena (qualitative values) belong to this type via the Phenomenon entity.
-     * Only populated for QUALITATIVE types.
-     */
     @OneToMany(mappedBy = "phenomenonType", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Phenomenon> phenomena = new ArrayList<>();
 
@@ -71,9 +52,6 @@ public class PhenomenonType {
     public String getAllowedUnitsRaw() { return allowedUnitsRaw; }
     public void setAllowedUnitsRaw(String allowedUnitsRaw) { this.allowedUnitsRaw = allowedUnitsRaw; }
 
-    /**
-     * Returns the set of allowed units parsed from the raw comma-separated string.
-     */
     public Set<String> getAllowedUnits() {
         Set<String> units = new HashSet<>();
         if (allowedUnitsRaw != null && !allowedUnitsRaw.isBlank()) {
@@ -87,9 +65,6 @@ public class PhenomenonType {
         return units;
     }
 
-    /**
-     * Sets the allowed units from a set, serializing to comma-separated string.
-     */
     public void setAllowedUnits(Set<String> units) {
         if (units == null || units.isEmpty()) {
             this.allowedUnitsRaw = null;

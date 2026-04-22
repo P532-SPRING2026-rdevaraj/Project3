@@ -7,10 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * Manager layer — manages AppUser entities (Change 3).
- * No authentication: just CRUD so the UI login dropdown can select a user.
- */
 @Service
 public class UserManager {
 

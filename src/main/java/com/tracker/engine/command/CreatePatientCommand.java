@@ -5,9 +5,6 @@ import com.tracker.resourceaccess.PatientRepository;
 
 import java.time.LocalDate;
 
-/**
- * Command pattern — wraps the "create patient" operation (F1).
- */
 public class CreatePatientCommand implements Command {
 
     private final PatientRepository patientRepository;

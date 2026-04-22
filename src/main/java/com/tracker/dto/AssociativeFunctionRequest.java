@@ -5,19 +5,15 @@ import com.tracker.domain.StrategyType;
 import java.util.List;
 import java.util.Map;
 
-/** Request body for creating a diagnostic rule (AssociativeFunction). Change 1 adds strategy fields. */
 public class AssociativeFunctionRequest {
     private String name;
     private List<Long> argumentConceptIds;
     private Long productConceptId;
 
-    /** Which strategy to use for this rule. Defaults to CONJUNCTIVE if omitted (Change 1). */
     private StrategyType strategyType;
 
-    /** Weights per argument concept: conceptId → weight (Change 1). */
     private Map<Long, Double> weightsMap;
 
-    /** Score threshold for WEIGHTED strategy (Change 1). */
     private Double threshold;
 
     public String getName() { return name; }

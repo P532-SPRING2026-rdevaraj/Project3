@@ -13,11 +13,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Observer pattern — Listener 2 of 3.
- * Change 1: uses updated DiagnosisEngine.evaluate() that returns EvaluationResult.
- * Change 4: only MANUAL observations are passed to rule evaluation.
- */
 @Component
 public class RuleEvaluationListener {
 
@@ -40,7 +35,6 @@ public class RuleEvaluationListener {
     public void onObservationEvent(ObservationEvent event) {
         Long patientId = event.getObservation().getPatient().getId();
 
-        // Exclude INFERRED observations from rule evaluation (Change 4)
         List<Observation> manualActiveObs = observationRepository
             .findByPatientIdAndStatus(patientId, ObservationStatus.ACTIVE)
             .stream()

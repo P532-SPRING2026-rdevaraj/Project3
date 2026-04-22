@@ -6,10 +6,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Map;
 
-/**
- * Strategy pattern factory — builds the Map<StrategyType, DiagnosisStrategy> injected
- * into DiagnosisEngine (Change 1). Adding a new strategy only requires adding an entry here.
- */
 @Configuration
 public class DiagnosisStrategyConfig {
 

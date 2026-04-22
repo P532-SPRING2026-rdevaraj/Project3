@@ -7,13 +7,6 @@ import com.tracker.resourceaccess.ObservationRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-/**
- * Manager layer — handles undo of recorded or rejected observations (Change 3).
- *
- * Undo is reconstructed from the persisted CommandLogEntry rather than replaying
- * the original Command object, which keeps the Command classes free of undo logic
- * and event-publishing dependencies.
- */
 @Service
 public class UndoManager {
 

@@ -2,7 +2,6 @@ package com.tracker.dto;
 
 import java.time.LocalDate;
 
-/** Request body for POST /api/patients (F1). */
 public class PatientRequest {
     private String fullName;
     private LocalDate dateOfBirth;

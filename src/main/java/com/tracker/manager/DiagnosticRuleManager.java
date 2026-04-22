@@ -10,12 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * Manager layer — orchestrates diagnostic rule use-cases (F6).
- *
- * Change 1: evaluateForPatient now returns List<EvaluationResult> with strategy and evidence.
- * Change 4: only MANUAL observations are passed to the engine (INFERRED are excluded).
- */
 @Service
 public class DiagnosticRuleManager {
 
@@ -54,11 +48,6 @@ public class DiagnosticRuleManager {
         return ruleRepository.save(rule);
     }
 
-    /**
-     * Evaluates all active rules against a patient's ACTIVE MANUAL observations (F6).
-     * Inferences are returned but NOT saved as observations.
-     * Change 4: INFERRED observations are excluded from the evidence set.
-     */
     public List<EvaluationResult> evaluateForPatient(Long patientId) {
         List<Observation> activeManualObs = observationRepository
             .findByPatientIdAndStatus(patientId, ObservationStatus.ACTIVE)

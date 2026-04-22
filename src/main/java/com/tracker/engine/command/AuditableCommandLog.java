@@ -9,20 +9,6 @@ import org.springframework.stereotype.Service;
 import java.time.Clock;
 import java.time.Instant;
 
-/**
- * Week 2 extension of CommandLog (Change 3).
- *
- * Overrides execute() to:
- *   1. Read the acting user from UserContextHolder (set per-request by UserInterceptor).
- *   2. Persist the affected observationId in the log entry for undo path support.
- *
- * ObservationId is captured in two ways — no interface change required on commands:
- *   - RecordObservationCommand: getSavedObservation().getId() (method existed in Week 1).
- *   - All other commands: parse "observationId" from getPayload() JSON if present
- *     (RejectObservationCommand already included it in Week 1's payload).
- *
- * @Primary ensures Spring injects this everywhere CommandLog is declared.
- */
 @Primary
 @Service
 public class AuditableCommandLog extends CommandLog {
@@ -47,9 +33,6 @@ public class AuditableCommandLog extends CommandLog {
             UserContextHolder.get()
         );
 
-        // Capture observationId without requiring commands to implement a new interface.
-        // RecordObservationCommand exposes the saved observation directly (Week 1 method).
-        // For all other commands the observationId is already embedded in getPayload() JSON.
         if (command instanceof RecordObservationCommand roc && roc.getSavedObservation() != null) {
             entry.setObservationId(roc.getSavedObservation().getId());
         } else {

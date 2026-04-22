@@ -3,14 +3,6 @@ package com.tracker.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
-/**
- * Knowledge-level entity representing a qualitative value for a PhenomenonType.
- * Examples: blood group A, blood group B, structural condition: Poor.
- * F2: Phenomenon-type catalogue.
- *
- * Phenomena belong to a PhenomenonType and represent the allowed qualitative
- * values that can be observed (Fowler Analysis Patterns Chapter 3).
- */
 @Entity
 @Table(name = "phenomena")
 public class Phenomenon {
@@ -27,10 +19,6 @@ public class Phenomenon {
     @JoinColumn(name = "phenomenon_type_id", nullable = false)
     private PhenomenonType phenomenonType;
 
-    /**
-     * Optional parent concept enabling hierarchy (Change 4 — concept hierarchy propagation).
-     * Null means this is a root concept.
-     */
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_concept_id")
     private Phenomenon parentConcept;

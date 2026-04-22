@@ -10,10 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Client layer — manages users and current-user session (Change 3).
- * No Spring Security; login just sets X-Current-User via the UI.
- */
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -37,7 +33,6 @@ public class UserController {
         return userManager.create(username, role);
     }
 
-    /** Returns the username currently active for this request (from X-Current-User header). */
     @GetMapping("/current")
     public Map<String, String> currentUser() {
         return Map.of("username", UserContextHolder.get());

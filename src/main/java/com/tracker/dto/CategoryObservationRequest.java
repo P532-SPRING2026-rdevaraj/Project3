@@ -3,14 +3,11 @@ package com.tracker.dto;
 import com.tracker.domain.Presence;
 import java.time.Instant;
 
-/** Request body for POST /api/observations/category (F4). */
 public class CategoryObservationRequest {
     private Long patientId;
     private Long phenomenonId;
     private Presence presence;
-    /** Optional protocol reference. */
     private Long protocolId;
-    /** Defaults to now if not provided. */
     private Instant applicabilityTime;
 
     public Long getPatientId() { return patientId; }

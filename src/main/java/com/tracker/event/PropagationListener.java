@@ -12,19 +12,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Observer pattern — Listener 3 (Change 4 — concept hierarchy propagation).
- *
- * After a CategoryObservation is saved, propagates presence/absence up/down the
- * Phenomenon hierarchy according to Analysis Patterns Section 3.6:
- *
- *   PRESENT → creates INFERRED PRESENT for all ancestor concepts not already present.
- *   ABSENT  → creates INFERRED ABSENT for all descendant concepts not already absent.
- *
- * Saves inferred observations directly via repository (not ObservationManager) to
- * avoid re-triggering this listener and creating infinite loops.
- * Inferred observations are flagged source=INFERRED and displayed in italics in the UI.
- */
 @Component
 public class PropagationListener {
 
@@ -45,7 +32,7 @@ public class PropagationListener {
         if (event.getEventType() != ObservationEvent.Type.CREATED) return;
         Observation obs = event.getObservation();
         if (!(obs instanceof CategoryObservation catObs)) return;
-        if (catObs.getSource() == ObservationSource.INFERRED) return; // avoid recursion
+        if (catObs.getSource() == ObservationSource.INFERRED) return;
 
         Patient patient = catObs.getPatient();
         Phenomenon phenomenon = catObs.getPhenomenon();
@@ -57,7 +44,6 @@ public class PropagationListener {
         }
     }
 
-    /** Creates INFERRED PRESENT for all ancestors not already present. */
     private void propagatePresent(Patient patient, Phenomenon phenomenon) {
         Set<Long> alreadyPresent = getActivePresent(patient);
         List<Phenomenon> ancestors = getAncestors(phenomenon);
@@ -70,7 +56,6 @@ public class PropagationListener {
         }
     }
 
-    /** Creates INFERRED ABSENT for all descendants not already absent. */
     private void propagateAbsent(Patient patient, Phenomenon phenomenon) {
         Set<Long> alreadyAbsent = getActiveAbsent(patient);
         List<Phenomenon> descendants = getDescendants(phenomenon);
@@ -83,7 +68,6 @@ public class PropagationListener {
         }
     }
 
-    /** Walks the parentConcept chain and returns all ancestors (root-most last). */
     private List<Phenomenon> getAncestors(Phenomenon phenomenon) {
         List<Phenomenon> ancestors = new ArrayList<>();
         Phenomenon current = phenomenon.getParentConcept();
@@ -94,7 +78,6 @@ public class PropagationListener {
         return ancestors;
     }
 
-    /** Returns all phenomena whose parentConcept chain includes this phenomenon. */
     private List<Phenomenon> getDescendants(Phenomenon phenomenon) {
         List<Phenomenon> all = phenomenonRepository.findAll();
         return all.stream()

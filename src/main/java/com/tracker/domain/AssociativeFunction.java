@@ -6,19 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Knowledge-level entity representing a diagnostic rule (associative function).
- * States: "if observations of all argumentConcepts are present for a patient,
- * then infer observation concept productConcept."
- *
- * argumentConcepts are stored as comma-separated PhenomenonType IDs.
- * productConcept is a single PhenomenonType ID (the inferred concept).
- *
- * F6: Diagnostic rule evaluation.
- *
- * Design hint: storing IDs as text keeps the schema Week-2-ready without
- * needing a join table or schema change for composite rules.
- */
 @Entity
 @Table(name = "associative_functions")
 public class AssociativeFunction {
@@ -30,43 +17,23 @@ public class AssociativeFunction {
     @Column(nullable = false)
     private String name;
 
-    /**
-     * Comma-separated list of PhenomenonType IDs that must all be present
-     * as active observations for the rule to fire.
-     */
     @Column(nullable = false, columnDefinition = "TEXT")
     private String argumentConceptIds;
 
-    /**
-     * The PhenomenonType that is inferred when all argument concepts are present.
-     */
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "product_concept_id", nullable = false)
     private PhenomenonType productConcept;
 
-    /** Whether this rule is active and should be evaluated. */
     @Column(nullable = false)
     private boolean active = true;
 
-    /**
-     * Selects which DiagnosisStrategy evaluates this rule (Change 1).
-     * Defaults to CONJUNCTIVE for backward compatibility with Week 1 rules.
-     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StrategyType strategyType = StrategyType.CONJUNCTIVE;
 
-    /**
-     * Weights per argument concept stored as "conceptId:weight,conceptId:weight".
-     * Used by WeightedScoringStrategy (Change 1).
-     */
     @Column(columnDefinition = "TEXT")
     private String weightsRaw;
 
-    /**
-     * Score threshold for WeightedScoringStrategy — rule fires when the sum of
-     * weights of present concepts exceeds this value (Change 1).
-     */
     @Column
     private Double threshold = 0.5;
 
@@ -102,7 +69,6 @@ public class AssociativeFunction {
     public Double getThreshold() { return threshold; }
     public void setThreshold(Double threshold) { this.threshold = threshold; }
 
-    /** Parses "conceptId:weight,..." into a Map<Long, Double>. */
     public Map<Long, Double> getWeightsMap() {
         Map<Long, Double> map = new HashMap<>();
         if (weightsRaw == null || weightsRaw.isBlank()) return map;
@@ -116,7 +82,6 @@ public class AssociativeFunction {
         return map;
     }
 
-    /** Serializes a Map<Long, Double> into "conceptId:weight,..." format. */
     public void setWeightsMap(Map<Long, Double> weights) {
         if (weights == null || weights.isEmpty()) { this.weightsRaw = null; return; }
         StringBuilder sb = new StringBuilder();
@@ -124,7 +89,6 @@ public class AssociativeFunction {
         this.weightsRaw = sb.toString();
     }
 
-    /** Parses the stored comma-separated IDs into a list of Longs. */
     public List<Long> getArgumentConceptIdList() {
         List<Long> ids = new ArrayList<>();
         if (argumentConceptIds != null && !argumentConceptIds.isBlank()) {
@@ -138,7 +102,6 @@ public class AssociativeFunction {
         return ids;
     }
 
-    /** Serializes the list of IDs into the comma-separated string. */
     public void setArgumentConceptIdList(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             this.argumentConceptIds = "";

@@ -11,12 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * Manager layer — orchestrates phenomenon-type and phenomenon use-cases (F2).
- *
- * Knowledge-level entities (PhenomenonType, Phenomenon) are managed here.
- * They are never created as side-effects of recording observations.
- */
 @Service
 public class PhenomenonTypeManager {
 
@@ -43,7 +37,7 @@ public class PhenomenonTypeManager {
         if (request.getKind() == MeasurementKind.QUANTITATIVE && request.getAllowedUnits() != null) {
             pt.setAllowedUnits(request.getAllowedUnits());
         }
-        // Change 2: store normal range for anomaly detection
+
         pt.setNormalMin(request.getNormalMin());
         pt.setNormalMax(request.getNormalMax());
         return phenomenonTypeRepository.save(pt);
@@ -56,7 +50,7 @@ public class PhenomenonTypeManager {
                 "Can only add phenomena to QUALITATIVE phenomenon types");
         }
         Phenomenon ph = new Phenomenon(request.getName(), pt);
-        // Change 4: wire parent concept if provided
+
         if (request.getParentConceptId() != null) {
             Phenomenon parent = findPhenomenonById(request.getParentConceptId());
             ph.setParentConcept(parent);

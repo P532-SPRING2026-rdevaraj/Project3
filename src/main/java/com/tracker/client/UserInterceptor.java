@@ -6,11 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-/**
- * Reads X-Current-User header on each request and stores the value in
- * UserContextHolder (thread-local). CommandLog reads it to stamp each command.
- * Cleared after the request completes to avoid leaking between threads.
- */
 @Component
 public class UserInterceptor implements HandlerInterceptor {
 

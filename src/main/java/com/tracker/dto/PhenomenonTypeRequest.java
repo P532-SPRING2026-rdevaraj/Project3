@@ -3,12 +3,10 @@ package com.tracker.dto;
 import com.tracker.domain.MeasurementKind;
 import java.util.Set;
 
-/** Request body for POST /api/phenomenon-types (F2). */
 public class PhenomenonTypeRequest {
     private String name;
     private MeasurementKind kind;
     private Set<String> allowedUnits;
-    /** Normal range for QUANTITATIVE types — used by AnomalyFlaggingDecorator (Change 2). */
     private Double normalMin;
     private Double normalMax;
 

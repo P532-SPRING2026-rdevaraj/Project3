@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Design Retrospective — Patient Observation Tracker</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Arial", sans-serif;
+    font-size: 9.5pt;
+    line-height: 1.45;
+    color: #1a1a1a;
+    background: #fff;
+  }
+  .page {
+    width: 210mm;
+    height: 297mm;
+    margin: 0 auto;
+    padding: 12mm 14mm 10mm 14mm;
+    overflow: hidden;
+  }
+  /* Single accent colour: #1e3a5f (dark navy) */
+  .doc-header {
+    border-bottom: 2px solid #1e3a5f;
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+  }
+  .doc-header h1 { font-size: 13pt; color: #1e3a5f; }
+  .doc-header .meta { font-size: 8pt; color: #444; margin-top: 2px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+
+  .change-box {
+    border: 1px solid #b0bec5;
+    border-radius: 4px;
+    padding: 6px 8px;
+    background: #f5f7fa;
+  }
+  .change-box h2 {
+    font-size: 9.5pt;
+    color: #1e3a5f;
+    border-left: 3px solid #1e3a5f;
+    padding-left: 6px;
+    margin-bottom: 5px;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 8.2pt; }
+  th {
+    background: #1e3a5f;
+    color: #fff;
+    padding: 2px 5px;
+    text-align: left;
+    font-size: 7.8pt;
+  }
+  td { padding: 2px 5px; border-bottom: 1px solid #dde3ea; vertical-align: top; }
+  tr:nth-child(even) td { background: #edf0f5; }
+
+  .badge {
+    display: inline-block;
+    padding: 0 5px;
+    border-radius: 8px;
+    font-size: 7pt;
+    font-weight: bold;
+  }
+  .n { background: #cdd8e8; color: #1e3a5f; }
+  .m { background: #e8ecf2; color: #1e3a5f; }
+
+  .note {
+    font-size: 7.8pt;
+    background: #e8ecf2;
+    border-left: 3px solid #1e3a5f;
+    padding: 3px 6px;
+    margin-top: 4px;
+    border-radius: 0 3px 3px 0;
+  }
+
+  .summary {
+    margin-top: 8px;
+    border: 1px solid #b0bec5;
+    border-radius: 4px;
+    padding: 5px 8px;
+    background: #f5f7fa;
+  }
+  .summary h2 {
+    font-size: 9.5pt;
+    color: #1e3a5f;
+    border-left: 3px solid #1e3a5f;
+    padding-left: 6px;
+    margin-bottom: 5px;
+  }
+  .summary table th { background: #1e3a5f; }
+  .summary table td { text-align: center; }
+  .summary table td:first-child { text-align: left; font-weight: bold; }
+
+  code { font-family: monospace; font-size: 8pt; background: #dde3ea; padding: 0 3px; border-radius: 2px; }
+
+  @media print {
+    .page { padding: 10mm 12mm; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="doc-header">
+    <h1>Design Retrospective — Patient Observation Tracker</h1>
+    <div class="meta">CSCI-P532 Object Oriented Software Development &nbsp;·&nbsp; Spring 2026 &nbsp;·&nbsp; Week 2 &nbsp;·&nbsp; Rohith Gowda Devaraju &nbsp;·&nbsp; rdevaraj@iu.edu</div>
+  </div>
+
+  <div class="grid">
+
+    <!-- CHANGE 1 -->
+    <div class="change-box">
+      <h2>Change 1 — Multiple Diagnosis Strategies</h2>
+      <table>
+        <thead><tr><th>Status</th><th>File</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge n">NEW</span></td><td><code>WeightedScoringStrategy</code></td></tr>
+          <tr><td><span class="badge n">NEW</span></td><td><code>DiagnosisStrategyConfig</code> (strategy Map bean)</td></tr>
+          <tr><td><span class="badge n">NEW</span></td><td><code>StrategyType</code> enum, <code>EvaluationResult</code> DTO</td></tr>
+          <tr><td><span class="badge m">MOD</span></td><td><code>DiagnosisEngine</code> — dispatches by <code>rule.getStrategyType()</code></td></tr>
+          <tr><td><span class="badge m">MOD</span></td><td><code>SimpleConjunctiveStrategy</code> — filters INFERRED obs</td></tr>
+          <tr><td><span class="badge m">MOD</span></td><td><code>AssociativeFunction</code> — added strategy, weights, threshold</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:7.8pt;margin-top:3px"><strong>Untouched:</strong> ObservationManager, ObservationFactory, all Commands, all Decorators, all Listeners.</p>
+      <div class="note"><strong>Unexpected touch:</strong> None. Strategy pattern absorbed the change entirely within the engine layer.</div>
+    </div>
+
+    <!-- CHANGE 2 -->
+    <div class="change-box">
+      <h2>Change 2 — Decorator Processing Pipeline</h2>
+      <table>
+        <thead><tr><th>Status</th><th>File</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge n">NEW</span></td><td><code>UnitValidationDecorator</code></td></tr>
+          <tr><td><span class="badge n">NEW</span></td><td><code>AnomalyFlaggingDecorator</code></td></tr>
+          <tr><td><span class="badge n">NEW</span></td><td><code>AuditStampingDecorator</code></td></tr>
+          <tr><td><span class="badge n">NEW</span></td><td><code>BaseObservationProcessor</code></td></tr>
+          <tr><td><span class="badge m">MOD</span></td><td><code>ObservationProcessorConfig</code> — assembles chain</td></tr>
+          <tr><td><span class="badge m">MOD</span></td><td><code>ObservationManager</code> — calls <code>processor.process()</code></td></tr>
+          <tr><td><span class="badge m">MOD</span></td><td><code>ObservationFactory</code> — unit validation removed</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:7.8pt;margin-top:3px"><strong>Untouched:</strong> DiagnosisEngine, all Strategies, all Commands, all Listeners.</p>
+      <div class="note"><strong>Unexpected touch — <code>ObservationFactory</code>:</strong> Unit validation had to be removed from the factory and moved into <code>UnitValidationDecorator</code>. <em>Redesign:</em> The factory should only construct objects; validation should have always lived in a separate collaborator, so no factory change would be needed when decorators change.</div>
+    </div>
+
+    <!-- CHANGE 3 -->
+    <div class="change-box">
+      <h2>Change 3 — Multi-User Support &amp; Command Undo</h2>
+      <table>
+        <thead><tr><th>Status</th><th>File</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge n">NEW</span></td><td><code>AuditableCommandLog</code> — reads real user from context</td></tr>
+          <tr><td><span class="badge n">NEW</span></td><td><code>UndoManager</code> — enforces same-user, single-undo</td></tr>
+          <tr><td><span class="badge n">NEW</span></td><td><code>ObservationAwareCommand</code> interface</td></tr>
+          <tr><td><span class="badge m">MOD</span></td><td><code>CommandLog</code> — captures observationId, reads user context</td></tr>
+          <tr><td><span class="badge m">MOD</span></td><td><code>RecordObservationCommand</code> — added <code>undo()</code> → REJECTED</td></tr>
+          <tr><td><span class="badge m">MOD</span></td><td><code>RejectObservationCommand</code> — added <code>undo()</code> → ACTIVE</td></tr>
+          <tr><td><span class="badge m">MOD</span></td><td><code>CreatePatientCommand</code> — added <code>undo()</code> → throws UnsupportedOp</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:7.8pt;margin-top:3px"><strong>Untouched:</strong> ObservationFactory, DiagnosisEngine, all Strategies, all Decorators, all Listeners.</p>
+      <div class="note"><strong>Unexpected touch:</strong> None. Command interface extension (adding <code>undo()</code>) was confined to the command layer. <code>AuditableCommandLog</code> extended rather than modified the original, preserving OCP.</div>
+    </div>
+
+    <!-- CHANGE 4 -->
+    <div class="change-box">
+      <h2>Change 4 — Concept Hierarchy &amp; Propagation</h2>
+      <table>
+        <thead><tr><th>Status</th><th>File</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge n">NEW</span></td><td><code>PropagationListener</code> — infers PRESENT ancestors / ABSENT descendants</td></tr>
+          <tr><td><span class="badge n">NEW</span></td><td><code>ObservationSource</code> enum (MANUAL / INFERRED)</td></tr>
+          <tr><td><span class="badge m">MOD</span></td><td><code>RuleEvaluationListener</code> — filters MANUAL obs only</td></tr>
+          <tr><td><span class="badge m">MOD</span></td><td><code>DiagnosisEngine</code> — pre-filters to MANUAL before dispatch</td></tr>
+          <tr><td><span class="badge m">MOD</span></td><td><code>ObservationFactory</code> — added <code>createInferred()</code> variant</td></tr>
+          <tr><td><span class="badge m">MOD</span></td><td><code>PhenomenonTypeManager</code> — resolves parentConcept FK</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:7.8pt;margin-top:3px"><strong>Untouched:</strong> AuditLogListener, all Commands, CommandLog, ObservationManager, all Decorators.</p>
+      <div class="note"><strong>Unexpected touch — <code>DiagnosisEngine</code>:</strong> Touched to pre-filter INFERRED obs before any strategy runs. <em>Redesign:</em> An injectable <code>ObservationFilter</code> predicate passed into the engine at construction time would eliminate future engine changes when filtering rules evolve.</div>
+    </div>
+
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="summary">
+    <h2>Summary — Pre-existing Pattern-Layer Files Modified per Change</h2>
+    <table>
+      <thead>
+        <tr><th>Change</th><th>New Files</th><th>Pre-existing Modified</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>C1 — WeightedScoringStrategy + strategy selection</td><td>4</td><td>2</td></tr>
+        <tr><td>C2 — Decorator pipeline (3 decorators)</td><td>4</td><td>3</td></tr>
+        <tr><td>C3 — Multi-user + Command undo</td><td>3</td><td>4</td></tr>
+        <tr><td>C4 — Concept hierarchy + propagation listener</td><td>2</td><td>4</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

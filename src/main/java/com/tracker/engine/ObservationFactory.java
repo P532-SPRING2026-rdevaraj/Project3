@@ -3,43 +3,18 @@ package com.tracker.engine;
 import com.tracker.domain.*;
 import org.springframework.stereotype.Service;
 
-
 import java.time.Clock;
 import java.time.Instant;
 
-/**
- * Factory pattern — the single authorised constructor for all Observation objects.
- *
- * Validates:
- *   - For Measurement: PhenomenonType must be QUANTITATIVE; unit must be in allowedUnits.
- *   - For CategoryObservation: PhenomenonType of the Phenomenon must be QUALITATIVE;
- *     Phenomenon must belong to a QUALITATIVE PhenomenonType.
- *
- * Controllers must never call new Measurement(...) or new CategoryObservation(...) directly.
- * All validation that can be moved here is here; the Manager trusts factory output as valid.
- */
 @Service
 public class ObservationFactory {
 
     private final Clock clock;
 
-    /** Clock is injected so tests can control time deterministically. */
     public ObservationFactory(Clock clock) {
         this.clock = clock;
     }
 
-    /**
-     * Creates a validated Measurement.
-     *
-     * @throws IllegalArgumentException if the phenomenon type is not QUANTITATIVE
-     *                                   or the unit is not in the allowed set
-     */
-    /**
-     * Creates a Measurement. Kind validation remains here; unit validation was moved
-     * to UnitValidationDecorator in the processing pipeline (Change 2).
-     *
-     * @throws IllegalArgumentException if the phenomenon type is not QUANTITATIVE
-     */
     public Measurement createMeasurement(Patient patient,
                                          PhenomenonType phenomenonType,
                                          Double amount,
@@ -59,11 +34,6 @@ public class ObservationFactory {
         return m;
     }
 
-    /**
-     * Creates a validated CategoryObservation.
-     *
-     * @throws IllegalArgumentException if the phenomenon's type is not QUALITATIVE
-     */
     public CategoryObservation createCategoryObservation(Patient patient,
                                                           Phenomenon phenomenon,
                                                           Presence presence,
@@ -73,10 +43,6 @@ public class ObservationFactory {
                                          applicabilityTime, ObservationSource.MANUAL);
     }
 
-    /**
-     * Creates a CategoryObservation with an explicit source — used by PropagationListener
-     * to create INFERRED observations (Change 4).
-     */
     public CategoryObservation createCategoryObservation(Patient patient,
                                                           Phenomenon phenomenon,
                                                           Presence presence,

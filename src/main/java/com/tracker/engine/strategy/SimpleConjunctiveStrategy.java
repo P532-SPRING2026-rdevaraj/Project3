@@ -8,15 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Strategy pattern — Week 1 concrete implementation (unchanged in Week 2).
- *
- * Fires a rule ONLY when ALL of the rule's argument observation concepts are
- * currently present as MANUAL active observations for the patient.
- *
- * INFERRED observations are excluded to avoid circular inference chains (Change 4).
- * DiagnosisStrategyConfig maps this bean to StrategyType.CONJUNCTIVE.
- */
 @Component
 public class SimpleConjunctiveStrategy implements DiagnosisStrategy {
 

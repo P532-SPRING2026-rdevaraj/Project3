@@ -6,12 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/**
- * ResourceAccess layer — atomic business verbs for AssociativeFunction persistence.
- */
 @Repository
 public interface AssociativeFunctionRepository extends JpaRepository<AssociativeFunction, Long> {
 
-    /** Returns only active rules for evaluation. */
     List<AssociativeFunction> findByActiveTrue();
 }

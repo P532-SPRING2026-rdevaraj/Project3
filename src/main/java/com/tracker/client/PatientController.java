@@ -8,11 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Client layer — HTTP only, zero business logic.
- * Delegates entirely to PatientManager.
- * F1: Patient management.
- */
 @RestController
 @RequestMapping("/api/patients")
 public class PatientController {
@@ -23,19 +18,16 @@ public class PatientController {
         this.patientManager = patientManager;
     }
 
-    /** GET /api/patients — List all patients. */
     @GetMapping
     public List<Patient> listAll() {
         return patientManager.listAll();
     }
 
-    /** GET /api/patients/{id} — Get a single patient. */
     @GetMapping("/{id}")
     public Patient getById(@PathVariable Long id) {
         return patientManager.findById(id);
     }
 
-    /** POST /api/patients — Create a patient. */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Patient create(@RequestBody PatientRequest request) {
